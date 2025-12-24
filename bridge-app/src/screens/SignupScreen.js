@@ -48,7 +48,7 @@ function SignupScreen({ data, update, onNext, onBack }) {
 
   return (
     <SplitLayout
-      progress={6}
+      progress={0}
       leftTitle="Let's get started with your details..."
       rightContent={
         <div>
