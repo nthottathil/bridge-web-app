@@ -14,6 +14,7 @@ function App() {
   const [userData, setUserData] = useState({
     // Sign up details
     firstName: '',
+    surname: '',
     email: '',
     age: 0,
     profession: '',

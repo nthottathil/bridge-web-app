@@ -7,7 +7,7 @@ function SignupScreen({ data, update, onNext, onBack }) {
   const [showError, setShowError] = useState('');
 
   const isValidEmail = data.email.includes('@') && data.email.includes('.');
-  const canProceed = data.firstName.trim() && data.email && data.age;
+  const canProceed = data.firstName.trim() && data.surname.trim() && data.email && data.age;
 
   const handleSendVerification = () => {
     if (!isValidEmail) {
@@ -15,7 +15,11 @@ function SignupScreen({ data, update, onNext, onBack }) {
       return;
     }
     if (!data.firstName.trim()) {
-      setShowError('Please enter your name');
+      setShowError('Please enter your first name');
+      return;
+    }
+    if (!data.surname.trim()) {
+      setShowError('Please enter your surname');
       return;
     }
     if (!data.age || data.age < 18) {
@@ -64,6 +68,12 @@ function SignupScreen({ data, update, onNext, onBack }) {
                 placeholder="John"
               />
               <TextInput
+                label="Surname"
+                value={data.surname}
+                onChange={v => update('surname', v)}
+                placeholder="Smith"
+              />
+              <TextInput
                 label="Email address"
                 type="email"
                 value={data.email}
@@ -72,9 +82,12 @@ function SignupScreen({ data, update, onNext, onBack }) {
               />
               <TextInput
                 label="Age"
-                type="number"
-                value={data.age}
-                onChange={v => update('age', parseInt(v) || 0)}
+                type="text"
+                value={data.age || ''}
+                onChange={v => {
+                  const numValue = v.replace(/\D/g, '');
+                  update('age', numValue ? parseInt(numValue) : 0);
+                }}
                 placeholder="25"
               />
               <TextInput

@@ -22,10 +22,14 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
   };
 
   const handleAgeRangeChange = (field, value) => {
-    const numValue = parseInt(value) || 18;
+    // Allow typing, only filter non-digits
+    const cleanedValue = value.replace(/\D/g, '');
+    const numValue = cleanedValue ? parseInt(cleanedValue) : (field === 'min' ? 18 : 99);
+    const clampedValue = Math.max(18, Math.min(99, numValue));
+
     update('agePreference', {
       ...data.agePreference,
-      [field]: Math.max(18, Math.min(99, numValue))
+      [field]: clampedValue
     });
   };
 
