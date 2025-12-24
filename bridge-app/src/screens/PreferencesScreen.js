@@ -153,58 +153,59 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                marginBottom: '8px',
-                fontSize: '12px',
-                color: '#888'
+                marginBottom: '12px',
+                fontSize: '13px',
+                color: '#1a5f5a',
+                fontWeight: '500'
               }}>
-                <span>18</span>
-                <span>99+</span>
+                <span>Min: {data.agePreference?.min || 18}</span>
+                <span>Max: {data.agePreference?.max || 99}</span>
               </div>
-              <div style={{ position: 'relative', height: '40px' }}>
+
+              {/* Min Age Slider */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  color: '#888',
+                  marginBottom: '6px'
+                }}>Minimum age</label>
                 <input
                   type="range"
                   min="18"
-                  max="99"
+                  max={data.agePreference?.max || 99}
                   value={data.agePreference?.min || 18}
                   onChange={e => handleAgeRangeChange('min', e.target.value)}
                   style={{
-                    position: 'absolute',
                     width: '100%',
                     height: '6px',
                     borderRadius: '3px',
                     cursor: 'pointer',
-                    pointerEvents: 'none',
-                    background: `linear-gradient(to right, #e0e0e0 0%, #e0e0e0 ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #1a5f5a ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #1a5f5a ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 100%)`
+                    background: `linear-gradient(to right, #1a5f5a 0%, #1a5f5a ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #e0e0e0 ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #e0e0e0 100%)`
                   }}
                 />
+              </div>
+
+              {/* Max Age Slider */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  color: '#888',
+                  marginBottom: '6px'
+                }}>Maximum age</label>
                 <input
                   type="range"
-                  min="18"
-                  max="99"
-                  value={data.agePreference?.min || 18}
-                  onChange={e => handleAgeRangeChange('min', e.target.value)}
-                  style={{
-                    position: 'absolute',
-                    width: '100%',
-                    appearance: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    outline: 'none'
-                  }}
-                />
-                <input
-                  type="range"
-                  min="18"
+                  min={data.agePreference?.min || 18}
                   max="99"
                   value={data.agePreference?.max || 99}
                   onChange={e => handleAgeRangeChange('max', e.target.value)}
                   style={{
-                    position: 'absolute',
                     width: '100%',
-                    appearance: 'none',
-                    background: 'transparent',
+                    height: '6px',
+                    borderRadius: '3px',
                     cursor: 'pointer',
-                    outline: 'none'
+                    background: `linear-gradient(to right, #1a5f5a 0%, #1a5f5a ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 100%)`
                   }}
                 />
               </div>
