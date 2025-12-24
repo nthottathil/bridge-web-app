@@ -537,13 +537,13 @@ function ChatRoomScreen({ data }) {
 
             {/* Profile Content */}
             <div style={{ padding: '24px' }}>
-              {/* Bio Section */}
+              {/* Statement Section */}
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>About</h3>
                 {isEditing ? (
                   <textarea
-                    value={profileData.bio}
-                    onChange={e => setProfileData({ ...profileData, bio: e.target.value.slice(0, 300) })}
+                    value={profileData.statement || ''}
+                    onChange={e => setProfileData({ ...profileData, statement: e.target.value.slice(0, 500) })}
                     style={{
                       width: '100%',
                       padding: '12px',
@@ -551,38 +551,43 @@ function ChatRoomScreen({ data }) {
                       border: '2px solid #e0e0e0',
                       borderRadius: '8px',
                       resize: 'vertical',
-                      minHeight: '80px',
+                      minHeight: '100px',
                       fontFamily: 'inherit',
                       boxSizing: 'border-box'
                     }}
                   />
                 ) : (
-                  <p style={{ fontSize: '14px', color: '#333', lineHeight: '1.6', margin: 0 }}>{profileData.bio}</p>
+                  <p style={{ fontSize: '14px', color: '#333', lineHeight: '1.6', margin: 0 }}>{profileData.statement || 'No statement yet'}</p>
+                )}
+                {isEditing && (
+                  <div style={{ fontSize: '12px', color: '#888', marginTop: '4px', textAlign: 'right' }}>
+                    {(profileData.statement || '').length}/500
+                  </div>
                 )}
               </div>
 
               {/* Details Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-                <ProfileField label="Email" value={profileData.email} isEditing={isEditing} onChange={v => setProfileData({ ...profileData, email: v })} />
-                <ProfileField label="Gender" value={profileData.gender} isEditing={isEditing} onChange={v => setProfileData({ ...profileData, gender: v })} />
-                <ProfileField label="Nationality" value={profileData.nationality} isEditing={isEditing} onChange={v => setProfileData({ ...profileData, nationality: v })} />
-                <ProfileField label="Ethnicity" value={profileData.ethnicity} isEditing={isEditing} onChange={v => setProfileData({ ...profileData, ethnicity: v })} />
+                <ProfileField label="Email" value={profileData.email} isEditing={false} readOnly={true} />
+                <ProfileField label="Age" value={profileData.age} isEditing={false} readOnly={true} />
+                <ProfileField label="Profession" value={profileData.profession} isEditing={isEditing} onChange={v => setProfileData({ ...profileData, profession: v })} />
+                <ProfileField label="Location" value={profileData.location} isEditing={isEditing} onChange={v => setProfileData({ ...profileData, location: v })} />
               </div>
 
-              {/* Goals */}
+              {/* Primary Goal */}
               <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Goals</h3>
+                <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Primary Goal</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {profileData.goals.map((goal, i) => (
-                    <span key={goal} style={{
+                  {profileData.primaryGoal && (
+                    <span style={{
                       fontSize: '13px',
                       padding: '6px 14px',
-                      backgroundColor: i === 0 ? '#1a5f5a' : '#f0f7f6',
+                      backgroundColor: '#1a5f5a',
                       borderRadius: '16px',
-                      color: i === 0 ? '#fff' : '#1a5f5a',
+                      color: '#fff',
                       fontWeight: '500'
-                    }}>{goal}</span>
-                  ))}
+                    }}>{profileData.primaryGoal}</span>
+                  )}
                 </div>
               </div>
 
@@ -590,7 +595,7 @@ function ChatRoomScreen({ data }) {
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Interests</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {profileData.interests.slice(0, 8).map((interest, i) => (
+                  {(profileData.interests || []).map((interest) => (
                     <span key={interest} style={{
                       fontSize: '13px',
                       padding: '6px 14px',
@@ -599,23 +604,6 @@ function ChatRoomScreen({ data }) {
                       color: '#1a5f5a',
                       fontWeight: '500'
                     }}>{interest}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Skills */}
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Skills</h3>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {profileData.skills.map(skill => (
-                    <span key={skill} style={{
-                      fontSize: '13px',
-                      padding: '6px 14px',
-                      backgroundColor: '#fff3e0',
-                      borderRadius: '16px',
-                      color: '#e65100',
-                      fontWeight: '500'
-                    }}>{skill}</span>
                   ))}
                 </div>
               </div>
@@ -713,11 +701,11 @@ function ChatRoomScreen({ data }) {
   );
 }
 
-function ProfileField({ label, value, isEditing, onChange }) {
+function ProfileField({ label, value, isEditing, onChange, readOnly }) {
   return (
     <div>
       <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{label}</h4>
-      {isEditing ? (
+      {isEditing && !readOnly ? (
         <input
           type="text"
           value={value}

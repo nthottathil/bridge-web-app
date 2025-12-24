@@ -24,18 +24,38 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
   const handleAgeRangeChange = (field, value) => {
     // Allow typing, only filter non-digits
     const cleanedValue = value.replace(/\D/g, '');
-    const numValue = cleanedValue ? parseInt(cleanedValue) : (field === 'min' ? 18 : 99);
-    const clampedValue = Math.max(18, Math.min(99, numValue));
 
+    if (cleanedValue === '') {
+      update('agePreference', {
+        ...data.agePreference,
+        [field]: ''
+      });
+      return;
+    }
+
+    const numValue = parseInt(cleanedValue);
+
+    // Store the value as-is while typing
     update('agePreference', {
       ...data.agePreference,
-      [field]: clampedValue
+      [field]: numValue
     });
+  };
+
+  const handleAgeBlur = (field) => {
+    // When field loses focus, enforce minimum of 18 for min age
+    if (field === 'min' && data.agePreference?.min !== '' && data.agePreference?.min < 18) {
+      update('agePreference', {
+        ...data.agePreference,
+        min: 18
+      });
+    }
   };
 
   const canProceed =
     data.genderPreference?.length > 0 &&
     data.agePreference?.min >= 18 &&
+    data.agePreference?.max !== '' &&
     data.agePreference?.max >= data.agePreference?.min;
 
   return (
@@ -90,12 +110,10 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
               fontWeight: '500'
             }}>Age range</label>
 
-            {/* Text Input Option */}
             <div style={{
               display: 'flex',
               gap: '16px',
-              alignItems: 'center',
-              marginBottom: '20px'
+              alignItems: 'center'
             }}>
               <div style={{ flex: 1 }}>
                 <label style={{
@@ -106,8 +124,9 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
                 }}>From</label>
                 <input
                   type="text"
-                  value={data.agePreference?.min || 18}
+                  value={data.agePreference?.min === '' ? '' : (data.agePreference?.min || 18)}
                   onChange={e => handleAgeRangeChange('min', e.target.value)}
+                  onBlur={() => handleAgeBlur('min')}
                   style={{
                     width: '100%',
                     padding: '12px',
@@ -133,7 +152,7 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
                 }}>To</label>
                 <input
                   type="text"
-                  value={data.agePreference?.max || 99}
+                  value={data.agePreference?.max === '' ? '' : (data.agePreference?.max || 99)}
                   onChange={e => handleAgeRangeChange('max', e.target.value)}
                   style={{
                     width: '100%',
@@ -143,69 +162,6 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
                     borderRadius: '12px',
                     outline: 'none',
                     boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Slider Option */}
-            <div>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '12px',
-                fontSize: '13px',
-                color: '#1a5f5a',
-                fontWeight: '500'
-              }}>
-                <span>Min: {data.agePreference?.min || 18}</span>
-                <span>Max: {data.agePreference?.max || 99}</span>
-              </div>
-
-              {/* Min Age Slider */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '11px',
-                  color: '#888',
-                  marginBottom: '6px'
-                }}>Minimum age</label>
-                <input
-                  type="range"
-                  min="18"
-                  max={data.agePreference?.max || 99}
-                  value={data.agePreference?.min || 18}
-                  onChange={e => handleAgeRangeChange('min', e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    background: `linear-gradient(to right, #1a5f5a 0%, #1a5f5a ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #e0e0e0 ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #e0e0e0 100%)`
-                  }}
-                />
-              </div>
-
-              {/* Max Age Slider */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '11px',
-                  color: '#888',
-                  marginBottom: '6px'
-                }}>Maximum age</label>
-                <input
-                  type="range"
-                  min={data.agePreference?.min || 18}
-                  max="99"
-                  value={data.agePreference?.max || 99}
-                  onChange={e => handleAgeRangeChange('max', e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    background: `linear-gradient(to right, #1a5f5a 0%, #1a5f5a ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 100%)`
                   }}
                 />
               </div>
