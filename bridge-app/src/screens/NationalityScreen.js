@@ -2,11 +2,14 @@ import React from 'react';
 import { SplitLayout, SelectionChip, TextInput, NavButton } from '../components';
 
 function NationalityScreen({ data, update, onNext, onBack }) {
-  const nationalities = [
+  const nationalitiesBase = [
     'United Kingdom', 'United States', 'India', 'China', 'Nigeria',
     'Germany', 'France', 'Brazil', 'Japan', 'Australia', 'Canada',
-    'South Korea', 'Mexico', 'Italy', 'Spain', 'Other'
+    'South Korea', 'Mexico', 'Italy', 'Spain'
   ];
+
+  // Sort alphabetically and add 'Other' at the end
+  const nationalities = [...nationalitiesBase].sort().concat(['Other']);
   
   const handleSelect = (nat) => {
     if (nat === 'Other') {

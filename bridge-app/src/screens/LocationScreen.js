@@ -2,8 +2,14 @@ import React from 'react';
 import { SplitLayout, TextInput, NavButton } from '../components';
 
 function LocationScreen({ data, update, onNext, onBack }) {
-  const distances = [5, 10, 25, 50, 100, 'Any'];
-  
+  const distances = [
+    { value: 5, label: '5 km' },
+    { value: 10, label: '10 km' },
+    { value: 100, label: '100 km' },
+    { value: 1000, label: '1000 km' },
+    { value: 10000, label: '1000+ km' }
+  ];
+
   return (
     <SplitLayout
       progress={94}
@@ -37,20 +43,20 @@ function LocationScreen({ data, update, onNext, onBack }) {
             }}>
               {distances.map(d => (
                 <button
-                  key={d}
-                  onClick={() => update('maxDistance', d)}
+                  key={d.value}
+                  onClick={() => update('maxDistance', d.value)}
                   style={{
                     padding: '12px 18px',
                     borderRadius: '24px',
-                    border: `2px solid ${data.maxDistance === d ? '#1a5f5a' : '#e0e0e0'}`,
-                    backgroundColor: data.maxDistance === d ? '#1a5f5a' : '#fff',
-                    color: data.maxDistance === d ? '#fff' : '#333',
+                    border: `2px solid ${data.maxDistance === d.value ? '#1a5f5a' : '#e0e0e0'}`,
+                    backgroundColor: data.maxDistance === d.value ? '#1a5f5a' : '#fff',
+                    color: data.maxDistance === d.value ? '#fff' : '#333',
                     fontSize: '14px',
                     cursor: 'pointer',
-                    fontWeight: data.maxDistance === d ? '500' : '400'
+                    fontWeight: data.maxDistance === d.value ? '500' : '400'
                   }}
                 >
-                  {d === 'Any' ? 'Any distance' : `${d} miles`}
+                  {d.label}
                 </button>
               ))}
             </div>

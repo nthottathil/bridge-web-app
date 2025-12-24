@@ -6,22 +6,17 @@ function GoalsScreen({ data, update, onNext, onBack }) {
     'Make new friends',
     'Professional networking',
     'Find a study group',
+    'Support group',
     'Dating',
     'Activity partners',
     'Mentorship',
     'Cultural exchange',
-    'Creative collaboration'
+    'Creative collaboration',
+    'Other'
   ];
-  
-  const toggleGoal = (goal) => {
-    const current = [...data.goals];
-    const index = current.indexOf(goal);
-    if (index > -1) {
-      current.splice(index, 1);
-    } else {
-      current.push(goal);
-    }
-    update('goals', current);
+
+  const selectGoal = (goal) => {
+    update('primaryGoal', goal);
   };
   
   return (
@@ -35,13 +30,13 @@ function GoalsScreen({ data, update, onNext, onBack }) {
             fontWeight: '600',
             color: '#1a1a1a',
             marginBottom: '8px'
-          }}>Select your goals</h2>
+          }}>What's your primary goal?</h2>
           <p style={{
             fontSize: '15px',
             color: '#666',
             marginBottom: '28px',
             lineHeight: '1.5'
-          }}>Choose all that apply. Your first selection will be weighted highest.</p>
+          }}>Choose the ONE goal that matters most to you. This will be the foundation of your matches.</p>
           <div style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -52,9 +47,8 @@ function GoalsScreen({ data, update, onNext, onBack }) {
               <SelectionChip
                 key={goal}
                 label={goal}
-                selected={data.goals.includes(goal)}
-                ranked={data.goals.indexOf(goal) > -1 ? data.goals.indexOf(goal) + 1 : null}
-                onClick={() => toggleGoal(goal)}
+                selected={data.primaryGoal === goal}
+                onClick={() => selectGoal(goal)}
               />
             ))}
           </div>
@@ -65,7 +59,7 @@ function GoalsScreen({ data, update, onNext, onBack }) {
             marginTop: '40px'
           }}>
             <NavButton onClick={onBack} direction="back" />
-            <NavButton onClick={onNext} disabled={data.goals.length === 0} />
+            <NavButton onClick={onNext} disabled={!data.primaryGoal} />
           </div>
         </div>
       }

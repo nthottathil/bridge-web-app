@@ -1,6 +1,21 @@
 import React from 'react';
 
-function SliderInput({ label, value, onChange, leftLabel, rightLabel }) {
+function SliderInput({ label, value, onChange, leftLabel, rightLabel, snapToPoints = true }) {
+  const snapPoints = [0, 25, 50, 75, 100];
+
+  const handleChange = (rawValue) => {
+    if (!snapToPoints) {
+      onChange(rawValue);
+      return;
+    }
+
+    // Find the closest snap point
+    const closest = snapPoints.reduce((prev, curr) =>
+      Math.abs(curr - rawValue) < Math.abs(prev - rawValue) ? curr : prev
+    );
+    onChange(closest);
+  };
+
   return (
     <div style={{ marginBottom: '28px' }}>
       <label style={{
@@ -26,7 +41,7 @@ function SliderInput({ label, value, onChange, leftLabel, rightLabel }) {
           min="0"
           max="100"
           value={value}
-          onChange={e => onChange(parseInt(e.target.value))}
+          onChange={e => handleChange(parseInt(e.target.value))}
           style={{
             flex: 1,
             height: '6px',
