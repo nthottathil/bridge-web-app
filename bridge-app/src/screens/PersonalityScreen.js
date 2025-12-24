@@ -50,7 +50,7 @@ function PersonalityScreen({ data, update, onNext, onBack }) {
           />
 
           <SliderInput
-            label="Organization"
+            label="Organisation"
             value={data.personality.conscientiousness}
             onChange={v => updatePersonality('conscientiousness', v)}
             leftLabel="Spontaneous"

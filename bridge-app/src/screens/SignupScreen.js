@@ -113,11 +113,10 @@ function SignupScreen({ data, update, onNext, onBack }) {
 
               <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
+                justifyContent: 'flex-end',
                 alignItems: 'center',
                 marginTop: '40px'
               }}>
-                <NavButton onClick={onBack} direction="back" />
                 <button
                   onClick={handleSendVerification}
                   style={{

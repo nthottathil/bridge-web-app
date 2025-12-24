@@ -13,12 +13,32 @@ function InterestsScreen({ data, update, onNext, onBack }) {
   const toggleInterest = (interest) => {
     const current = [...data.interests];
     const index = current.indexOf(interest);
+
     if (index > -1) {
       // Remove if already selected
       current.splice(index, 1);
     } else {
-      // Add to the beginning (top priority)
-      current.unshift(interest);
+      // Find which category this interest belongs to
+      let category = '';
+      for (const [cat, interests] of Object.entries(interestCategories)) {
+        if (interests.includes(interest)) {
+          category = cat;
+          break;
+        }
+      }
+
+      // Find the first selected interest in this category
+      const categoryInterests = interestCategories[category];
+      const firstSelectedInCategory = current.find(i => categoryInterests.includes(i));
+
+      if (firstSelectedInCategory) {
+        // Insert after the first selected interest in this category
+        const insertIndex = current.indexOf(firstSelectedInCategory) + 1;
+        current.splice(insertIndex, 0, interest);
+      } else {
+        // No interests selected in this category yet, add to beginning
+        current.unshift(interest);
+      }
     }
     update('interests', current);
   };

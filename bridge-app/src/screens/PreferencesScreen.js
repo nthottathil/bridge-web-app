@@ -89,10 +89,13 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
               marginBottom: '12px',
               fontWeight: '500'
             }}>Age range</label>
+
+            {/* Text Input Option */}
             <div style={{
               display: 'flex',
               gap: '16px',
-              alignItems: 'center'
+              alignItems: 'center',
+              marginBottom: '20px'
             }}>
               <div style={{ flex: 1 }}>
                 <label style={{
@@ -102,9 +105,7 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
                   marginBottom: '8px'
                 }}>From</label>
                 <input
-                  type="number"
-                  min="18"
-                  max="99"
+                  type="text"
                   value={data.agePreference?.min || 18}
                   onChange={e => handleAgeRangeChange('min', e.target.value)}
                   style={{
@@ -131,9 +132,7 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
                   marginBottom: '8px'
                 }}>To</label>
                 <input
-                  type="number"
-                  min="18"
-                  max="99"
+                  type="text"
                   value={data.agePreference?.max || 99}
                   onChange={e => handleAgeRangeChange('max', e.target.value)}
                   style={{
@@ -144,6 +143,68 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
                     borderRadius: '12px',
                     outline: 'none',
                     boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Slider Option */}
+            <div>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+                fontSize: '12px',
+                color: '#888'
+              }}>
+                <span>18</span>
+                <span>99+</span>
+              </div>
+              <div style={{ position: 'relative', height: '40px' }}>
+                <input
+                  type="range"
+                  min="18"
+                  max="99"
+                  value={data.agePreference?.min || 18}
+                  onChange={e => handleAgeRangeChange('min', e.target.value)}
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '6px',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    pointerEvents: 'none',
+                    background: `linear-gradient(to right, #e0e0e0 0%, #e0e0e0 ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #1a5f5a ${((data.agePreference?.min - 18) / (99 - 18)) * 100}%, #1a5f5a ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 ${((data.agePreference?.max - 18) / (99 - 18)) * 100}%, #e0e0e0 100%)`
+                  }}
+                />
+                <input
+                  type="range"
+                  min="18"
+                  max="99"
+                  value={data.agePreference?.min || 18}
+                  onChange={e => handleAgeRangeChange('min', e.target.value)}
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    appearance: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    outline: 'none'
+                  }}
+                />
+                <input
+                  type="range"
+                  min="18"
+                  max="99"
+                  value={data.agePreference?.max || 99}
+                  onChange={e => handleAgeRangeChange('max', e.target.value)}
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    appearance: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    outline: 'none'
                   }}
                 />
               </div>

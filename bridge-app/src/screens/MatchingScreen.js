@@ -525,10 +525,10 @@ function ChatRoomScreen({ data }) {
                 fontWeight: '600',
                 margin: '0 auto 16px'
               }}>
-                {profileData.firstName[0]}{profileData.lastName[0]}
+                {profileData.firstName[0]}{profileData.surname?.[0] || ''}
               </div>
               <h2 style={{ fontSize: '24px', fontWeight: '600', margin: 0 }}>
-                {profileData.preferredName || profileData.firstName} {profileData.lastName}
+                {profileData.preferredName || profileData.firstName} {profileData.surname || ''}
               </h2>
               <p style={{ fontSize: '14px', opacity: 0.8, marginTop: '4px' }}>
                 {profileData.profession} • {profileData.location}
