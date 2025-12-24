@@ -5,5 +5,6 @@ export { default as TextInput } from './TextInput';
 export { default as Checkbox } from './Checkbox';
 export { default as SelectionChip } from './SelectionChip';
 export { default as SliderInput } from './SliderInput';
+export { default as RangeSlider } from './RangeSlider';
 export { default as ValidationPopup } from './ValidationPopup';
 export { default as FloatingNav } from './FloatingNav';

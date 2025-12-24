@@ -1,5 +1,5 @@
 import React from 'react';
-import { SplitLayout, SelectionChip, NavButton } from '../components';
+import { SplitLayout, SelectionChip, NavButton, RangeSlider } from '../components';
 
 function PreferencesScreen({ data, update, onNext, onBack }) {
   const genderOptions = ['Male', 'Female', 'Non-binary', 'Any', 'Other'];
@@ -21,35 +21,11 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
     }
   };
 
-  const handleAgeRangeChange = (field, value) => {
-    // Allow typing, only filter non-digits
-    const cleanedValue = value.replace(/\D/g, '');
-
-    if (cleanedValue === '') {
-      update('agePreference', {
-        ...data.agePreference,
-        [field]: ''
-      });
-      return;
-    }
-
-    const numValue = parseInt(cleanedValue);
-
-    // Store the value as-is while typing
+  const handleAgeRangeSlider = (min, max) => {
     update('agePreference', {
-      ...data.agePreference,
-      [field]: numValue
+      min: Math.max(18, min),
+      max: max
     });
-  };
-
-  const handleAgeBlur = (field) => {
-    // When field loses focus, enforce minimum of 18 for min age
-    if (field === 'min' && data.agePreference?.min !== '' && data.agePreference?.min < 18) {
-      update('agePreference', {
-        ...data.agePreference,
-        min: 18
-      });
-    }
   };
 
   const canProceed =
@@ -101,72 +77,14 @@ function PreferencesScreen({ data, update, onNext, onBack }) {
             </div>
           </div>
 
-          <div style={{ marginBottom: '28px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              color: '#555',
-              marginBottom: '12px',
-              fontWeight: '500'
-            }}>Age range</label>
-
-            <div style={{
-              display: 'flex',
-              gap: '16px',
-              alignItems: 'center'
-            }}>
-              <div style={{ flex: 1 }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  color: '#888',
-                  marginBottom: '8px'
-                }}>From</label>
-                <input
-                  type="text"
-                  value={data.agePreference?.min === '' ? '' : (data.agePreference?.min || 18)}
-                  onChange={e => handleAgeRangeChange('min', e.target.value)}
-                  onBlur={() => handleAgeBlur('min')}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    fontSize: '15px',
-                    border: '2px solid #e0e0e0',
-                    borderRadius: '12px',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-              <span style={{
-                fontSize: '20px',
-                color: '#ccc',
-                marginTop: '20px'
-              }}>—</span>
-              <div style={{ flex: 1 }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  color: '#888',
-                  marginBottom: '8px'
-                }}>To</label>
-                <input
-                  type="text"
-                  value={data.agePreference?.max === '' ? '' : (data.agePreference?.max || 99)}
-                  onChange={e => handleAgeRangeChange('max', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    fontSize: '15px',
-                    border: '2px solid #e0e0e0',
-                    borderRadius: '12px',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <RangeSlider
+            label="Age range"
+            min={18}
+            max={99}
+            minValue={data.agePreference?.min || 18}
+            maxValue={data.agePreference?.max || 99}
+            onChange={handleAgeRangeSlider}
+          />
 
           <div style={{
             display: 'flex',
