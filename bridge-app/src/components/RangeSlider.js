@@ -13,11 +13,12 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
   };
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMove = (e) => {
       if (!dragging || !rangeRef.current) return;
 
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const rect = rangeRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
       const percent = (x / rect.width) * 100;
       const value = Math.round((percent / 100) * (max - min) + min);
 
@@ -30,16 +31,20 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
       }
     };
 
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       setDragging(null);
     };
 
     if (dragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchmove', handleMove, { passive: false });
+      document.addEventListener('touchend', handleEnd);
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', handleEnd);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', handleEnd);
       };
     }
   }, [dragging, min, max, minValue, maxValue, onChange]);
@@ -94,6 +99,7 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
           {/* Min thumb */}
           <div
             onMouseDown={handleMouseDown('min')}
+            onTouchStart={handleMouseDown('min')}
             style={{
               position: 'absolute',
               left: `${minPercent}%`,
@@ -104,15 +110,18 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
               backgroundColor: '#fff',
               border: '3px solid #1a5f5a',
               borderRadius: '50%',
-              cursor: 'grab',
+              cursor: dragging === 'min' ? 'grabbing' : 'grab',
               boxShadow: dragging === 'min' ? '0 0 0 4px rgba(26, 95, 90, 0.1)' : '0 2px 4px rgba(0,0,0,0.1)',
-              transition: dragging === 'min' ? 'none' : 'box-shadow 0.2s'
+              transition: dragging === 'min' ? 'none' : 'box-shadow 0.2s',
+              touchAction: 'none',
+              userSelect: 'none'
             }}
           />
 
           {/* Max thumb */}
           <div
             onMouseDown={handleMouseDown('max')}
+            onTouchStart={handleMouseDown('max')}
             style={{
               position: 'absolute',
               left: `${maxPercent}%`,
@@ -123,9 +132,11 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
               backgroundColor: '#fff',
               border: '3px solid #1a5f5a',
               borderRadius: '50%',
-              cursor: 'grab',
+              cursor: dragging === 'max' ? 'grabbing' : 'grab',
               boxShadow: dragging === 'max' ? '0 0 0 4px rgba(26, 95, 90, 0.1)' : '0 2px 4px rgba(0,0,0,0.1)',
-              transition: dragging === 'max' ? 'none' : 'box-shadow 0.2s'
+              transition: dragging === 'max' ? 'none' : 'box-shadow 0.2s',
+              touchAction: 'none',
+              userSelect: 'none'
             }}
           />
         </div>

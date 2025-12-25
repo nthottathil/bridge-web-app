@@ -21,7 +21,7 @@ def send_verification_email(email: str, code: str) -> bool:
     """
     # For MVP: Simulate email sending
     print("\n" + "="*60)
-    print(f"📧 VERIFICATION EMAIL (SIMULATED)")
+    print(f"[EMAIL] VERIFICATION EMAIL (SIMULATED)")
     print("="*60)
     print(f"To: {email}")
     print(f"Subject: Verify your Bridge account")
@@ -79,7 +79,7 @@ def send_match_notification(email: str, matcher_name: str) -> bool:
         True if email sent successfully
     """
     print("\n" + "="*60)
-    print(f"📧 MATCH NOTIFICATION (SIMULATED)")
+    print(f"[EMAIL] MATCH NOTIFICATION (SIMULATED)")
     print("="*60)
     print(f"To: {email}")
     print(f"Subject: New match request from {matcher_name}")
@@ -103,7 +103,7 @@ def send_group_joined_notification(email: str, group_member_name: str) -> bool:
         True if email sent successfully
     """
     print("\n" + "="*60)
-    print(f"📧 GROUP NOTIFICATION (SIMULATED)")
+    print(f"[EMAIL] GROUP NOTIFICATION (SIMULATED)")
     print("="*60)
     print(f"To: {email}")
     print(f"Subject: {group_member_name} joined your Bridge group!")

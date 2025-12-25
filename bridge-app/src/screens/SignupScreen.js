@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { SplitLayout, TextInput, NavButton } from '../components';
+import { useAuth } from '../context/AuthContext';
 
-function SignupScreen({ data, update, onNext, onBack }) {
+function SignupScreen({ data, update, onNext, onSwitchToLogin }) {
+  const { signup, verify } = useAuth();
   const [emailSent, setEmailSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [showError, setShowError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const isValidEmail = data.email.includes('@') && data.email.includes('.');
-  const canProceed = data.firstName.trim() && data.surname.trim() && data.email && data.age;
+  const passwordsMatch = password === confirmPassword;
+  const passwordValid = password.length >= 8;
+  const canProceed = data.firstName.trim() && data.surname.trim() && data.email && data.age && passwordValid && passwordsMatch;
 
-  const handleSendVerification = () => {
+  const handleSendVerification = async () => {
     if (!isValidEmail) {
       setShowError('Please enter a valid email address');
       return;
@@ -30,19 +37,69 @@ function SignupScreen({ data, update, onNext, onBack }) {
       setShowError('Please enter your profession');
       return;
     }
+    if (!passwordValid) {
+      setShowError('Password must be at least 8 characters long');
+      return;
+    }
+    if (!passwordsMatch) {
+      setShowError('Passwords do not match');
+      return;
+    }
 
-    // Simulate sending verification email
-    console.log('Sending verification email to:', data.email);
-    setEmailSent(true);
+    setLoading(true);
     setShowError('');
+
+    try {
+      // Call real signup API
+      await signup({
+        email: data.email,
+        password: password,
+        first_name: data.firstName,
+        surname: data.surname,
+        age: data.age,
+        profession: data.profession,
+        primary_goal: data.primaryGoal || 'networking',
+        interests: data.interests || [],
+        personality: {
+          extroversion: Math.round(data.personality.extroversion / 10),
+          openness: Math.round(data.personality.openness / 10),
+          agreeableness: Math.round(data.personality.agreeableness / 10),
+          conscientiousness: Math.round(data.personality.conscientiousness / 10)
+        },
+        gender_preference: data.genderPreference || ['any'],
+        age_preference: data.agePreference || { min: 18, max: 99 },
+        statement: data.statement || '',
+        location: data.location || 'London',
+        max_distance: data.maxDistance || 5
+      });
+
+      console.log('Verification email sent to:', data.email);
+      setEmailSent(true);
+    } catch (error) {
+      console.error('Signup error:', error);
+      setShowError(error.response?.data?.detail || 'Failed to send verification email. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleVerifyAndNext = () => {
-    // In a real app, verify the code here
-    if (verificationCode.length === 6) {
-      onNext();
-    } else {
+  const handleVerifyAndNext = async () => {
+    if (verificationCode.length !== 6) {
       setShowError('Please enter the 6-digit verification code');
+      return;
+    }
+
+    setLoading(true);
+    setShowError('');
+
+    try {
+      await verify(data.email, verificationCode);
+      onNext();
+    } catch (error) {
+      console.error('Verification error:', error);
+      setShowError(error.response?.data?.detail || 'Invalid verification code. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,6 +153,20 @@ function SignupScreen({ data, update, onNext, onBack }) {
                 onChange={v => update('profession', v)}
                 placeholder="Software Engineer"
               />
+              <TextInput
+                label="Password"
+                type="password"
+                value={password}
+                onChange={v => setPassword(v)}
+                placeholder="At least 8 characters"
+              />
+              <TextInput
+                label="Confirm Password"
+                type="password"
+                value={confirmPassword}
+                onChange={v => setConfirmPassword(v)}
+                placeholder="Re-enter your password"
+              />
 
               {showError && (
                 <div style={{
@@ -113,24 +184,50 @@ function SignupScreen({ data, update, onNext, onBack }) {
 
               <div style={{
                 display: 'flex',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                marginTop: '40px'
+                marginTop: '40px',
+                gap: '16px'
               }}>
+                {onSwitchToLogin && (
+                  <button
+                    onClick={onSwitchToLogin}
+                    style={{
+                      padding: '12px 24px',
+                      borderRadius: '20px',
+                      border: '2px solid #1a5f5a',
+                      backgroundColor: 'transparent',
+                      color: '#1a5f5a',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      fontWeight: '500',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#f0f7f6';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    Already have an account?
+                  </button>
+                )}
                 <button
                   onClick={handleSendVerification}
+                  disabled={!canProceed || loading}
                   style={{
                     padding: '12px 24px',
                     borderRadius: '24px',
                     border: 'none',
-                    backgroundColor: canProceed ? '#1a5f5a' : '#ccc',
+                    backgroundColor: canProceed && !loading ? '#1a5f5a' : '#ccc',
                     color: '#fff',
                     fontSize: '15px',
-                    cursor: canProceed ? 'pointer' : 'not-allowed',
+                    cursor: canProceed && !loading ? 'pointer' : 'not-allowed',
                     fontWeight: '500'
                   }}
                 >
-                  Send Verification Email
+                  {loading ? 'Sending...' : 'Send Verification Email'}
                 </button>
               </div>
             </>
@@ -219,18 +316,19 @@ function SignupScreen({ data, update, onNext, onBack }) {
                 </button>
                 <button
                   onClick={handleVerifyAndNext}
+                  disabled={verificationCode.length !== 6 || loading}
                   style={{
                     padding: '12px 24px',
                     borderRadius: '24px',
                     border: 'none',
-                    backgroundColor: verificationCode.length === 6 ? '#1a5f5a' : '#ccc',
+                    backgroundColor: verificationCode.length === 6 && !loading ? '#1a5f5a' : '#ccc',
                     color: '#fff',
                     fontSize: '15px',
-                    cursor: verificationCode.length === 6 ? 'pointer' : 'not-allowed',
+                    cursor: verificationCode.length === 6 && !loading ? 'pointer' : 'not-allowed',
                     fontWeight: '500'
                   }}
                 >
-                  Verify & Continue →
+                  {loading ? 'Verifying...' : 'Verify & Continue →'}
                 </button>
               </div>
             </>
