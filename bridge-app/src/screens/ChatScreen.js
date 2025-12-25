@@ -18,6 +18,7 @@ function ChatScreen({ groupData, userData }) {
     }, 5000);
 
     return () => clearInterval(pollInterval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupData.group_id]);
 
   const loadMessages = async () => {

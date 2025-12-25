@@ -35,11 +35,6 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleLogin();
-    }
-  };
 
   const canProceed = email && password && !loading;
 

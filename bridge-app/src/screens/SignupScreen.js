@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SplitLayout, TextInput, NavButton } from '../components';
+import { SplitLayout, TextInput } from '../components';
 import { useAuth } from '../context/AuthContext';
 
 function SignupScreen({ data, update, onNext, onSwitchToLogin }) {
