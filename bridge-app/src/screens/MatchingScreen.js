@@ -167,7 +167,7 @@ function MatchingScreen({ data, onBack }) {
             textAlign: 'center',
             marginBottom: '8px'
           }}>
-            {matches.length > 0 ? 'We found some brilliant matches!' : 'No matches yet'}
+            {matches.length > 0 ? 'Your Top 3 Matches!' : 'No matches yet'}
           </h2>
           <p style={{
             fontSize: '16px',
@@ -176,7 +176,7 @@ function MatchingScreen({ data, onBack }) {
             marginBottom: '32px'
           }}>
             {matches.length > 0
-              ? 'Select someone to send them a match request'
+              ? 'Pick one to send them a match request'
               : 'Check back later as more people join Bridge'
             }
           </p>

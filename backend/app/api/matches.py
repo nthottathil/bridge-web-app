@@ -58,9 +58,9 @@ def get_matches(
     db: Session = Depends(get_db)
 ):
     """
-    Get potential matches for the current user.
+    Get top 3 potential matches for the current user.
 
-    Returns users with compatibility score >= 50, sorted by score.
+    Returns the 3 users with highest compatibility scores.
     Filters out users already in groups and those with pending requests.
     """
     # Check if user is already in a group
@@ -70,7 +70,7 @@ def get_matches(
             detail="You are already in a group. Leave your current group to find new matches."
         )
 
-    matches = find_potential_matches(db, current_user, limit=20)
+    matches = find_potential_matches(db, current_user, limit=3)
 
     return matches
 
