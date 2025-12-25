@@ -1,16 +1,14 @@
 """
-Email service for sending verification codes and notifications.
-For MVP, emails are simulated by printing to console.
-Can be upgraded to use real SMTP later.
+Email service for sending verification codes and notifications using Resend.
 """
 from typing import Optional
 from app.core.config import settings
+import requests
 
 
 def send_verification_email(email: str, code: str) -> bool:
     """
-    Send verification code to user's email.
-    Currently simulates email by printing to console.
+    Send verification code to user's email using Resend.
 
     Args:
         email: Recipient email address
@@ -19,49 +17,55 @@ def send_verification_email(email: str, code: str) -> bool:
     Returns:
         True if email sent successfully
     """
-    # For MVP: Simulate email sending
+    # Print to console for debugging
     print("\n" + "="*60)
-    print(f"[EMAIL] VERIFICATION EMAIL (SIMULATED)")
-    print("="*60)
-    print(f"To: {email}")
-    print(f"Subject: Verify your Bridge account")
-    print(f"\nYour verification code is: {code}")
-    print(f"\nEnter this code in the app to verify your email.")
+    print(f"[EMAIL] Sending verification email to {email}")
+    print(f"Verification code: {code}")
     print("="*60 + "\n")
 
-    # TODO: For production, implement real SMTP:
-    # import smtplib
-    # from email.mime.text import MIMEText
-    # from email.mime.multipart import MIMEMultipart
-    #
-    # if settings.EMAIL_HOST and settings.EMAIL_USER:
-    #     try:
-    #         msg = MIMEMultipart()
-    #         msg['From'] = settings.EMAIL_FROM
-    #         msg['To'] = email
-    #         msg['Subject'] = "Verify your Bridge account"
-    #
-    #         body = f"""
-    #         Welcome to Bridge!
-    #
-    #         Your verification code is: {code}
-    #
-    #         Enter this code in the app to verify your email and start connecting.
-    #
-    #         Best regards,
-    #         The Bridge Team
-    #         """
-    #         msg.attach(MIMEText(body, 'plain'))
-    #
-    #         with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT) as server:
-    #             server.starttls()
-    #             server.login(settings.EMAIL_USER, settings.EMAIL_PASSWORD)
-    #             server.send_message(msg)
-    #
-    #         return True
-    #     except Exception as e:
-    #         print(f"Error sending email: {e}")
-    #         return False
+    # Send via Resend API
+    if settings.RESEND_API_KEY:
+        try:
+            response = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "Bridge <onboarding@resend.dev>",
+                    "to": [email],
+                    "subject": "Verify your Bridge account",
+                    "html": f"""
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #1a5f5a;">Welcome to Bridge!</h2>
+                        <p>Your verification code is:</p>
+                        <div style="background-color: #f0f7f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; color: #1a5f5a; letter-spacing: 5px; border-radius: 8px; margin: 20px 0;">
+                            {code}
+                        </div>
+                        <p>Enter this code in the app to verify your email and start connecting with like-minded people.</p>
+                        <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                            Best regards,<br>
+                            The Bridge Team
+                        </p>
+                    </div>
+                    """
+                }
+            )
+
+            if response.status_code == 200:
+                print(f"✅ Email sent successfully to {email}")
+                return True
+            else:
+                print(f"❌ Failed to send email: {response.status_code} - {response.text}")
+                return False
+
+        except Exception as e:
+            print(f"❌ Error sending email: {e}")
+            return False
+    else:
+        print("⚠️  RESEND_API_KEY not configured - email not sent")
+        return True  # Return True to not block signup during development
 
     return True
 
