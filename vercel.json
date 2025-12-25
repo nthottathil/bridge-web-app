@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd bridge-app && npm install && npm run build",
-  "outputDirectory": "bridge-app/build",
-  "framework": null,
-  "installCommand": "cd bridge-app && npm install"
-}
