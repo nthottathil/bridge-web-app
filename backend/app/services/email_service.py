@@ -33,7 +33,7 @@ def send_verification_email(email: str, code: str) -> bool:
                     "Content-Type": "application/json"
                 },
                 json={
-                    "from": "Bridge <onboarding@resend.dev>",
+                    "from": "Bridge <noreply@thebridgeapp.online>",
                     "to": [email],
                     "subject": "Verify your Bridge account",
                     "html": f"""
@@ -54,17 +54,17 @@ def send_verification_email(email: str, code: str) -> bool:
             )
 
             if response.status_code == 200:
-                print(f"✅ Email sent successfully to {email}")
+                print(f"[OK] Email sent successfully to {email}")
                 return True
             else:
-                print(f"❌ Failed to send email: {response.status_code} - {response.text}")
+                print(f"[ERROR] Failed to send email: {response.status_code} - {response.text}")
                 return False
 
         except Exception as e:
-            print(f"❌ Error sending email: {e}")
+            print(f"[ERROR] Error sending email: {e}")
             return False
     else:
-        print("⚠️  RESEND_API_KEY not configured - email not sent")
+        print("[WARN] RESEND_API_KEY not configured - email not sent")
         return True  # Return True to not block signup during development
 
     return True

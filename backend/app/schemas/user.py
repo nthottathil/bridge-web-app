@@ -73,6 +73,21 @@ class UserProfile(BaseModel):
         from_attributes = True
 
 
+class UserProfileUpdate(BaseModel):
+    first_name: Optional[str] = None
+    surname: Optional[str] = None
+    age: Optional[int] = None
+    profession: Optional[str] = None
+    primary_goal: Optional[str] = None
+    interests: Optional[List[str]] = None
+    personality: Optional[PersonalitySchema] = None
+    gender_preference: Optional[List[str]] = None
+    age_preference: Optional[AgePreferenceSchema] = None
+    statement: Optional[str] = None
+    location: Optional[str] = None
+    max_distance: Optional[int] = None
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

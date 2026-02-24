@@ -10,11 +10,13 @@ import PreferencesScreen from './screens/PreferencesScreen';
 import StatementScreen from './screens/StatementScreen';
 import LocationScreen from './screens/LocationScreen';
 import MatchingScreen from './screens/MatchingScreen';
+import ProfileScreen from './screens/ProfileScreen';
 import { authAPI } from './services/api';
 
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [userData, setUserData] = useState({
     // Sign up details
@@ -90,6 +92,33 @@ function AppContent() {
     setUserData(prev => ({ ...prev, [field]: value }));
   };
 
+  const saveOnboardingData = async () => {
+    try {
+      await authAPI.updateProfile({
+        first_name: userData.firstName,
+        surname: userData.surname,
+        age: userData.age,
+        profession: userData.profession,
+        primary_goal: userData.primaryGoal || 'networking',
+        interests: userData.interests || [],
+        personality: {
+          extroversion: Math.round(userData.personality.extroversion / 10),
+          openness: Math.round(userData.personality.openness / 10),
+          agreeableness: Math.round(userData.personality.agreeableness / 10),
+          conscientiousness: Math.round(userData.personality.conscientiousness / 10)
+        },
+        gender_preference: userData.genderPreference || ['any'],
+        age_preference: userData.agePreference || { min: 18, max: 99 },
+        statement: userData.statement || '',
+        location: userData.location || 'London',
+        max_distance: userData.maxDistance || 5
+      });
+      console.log('Onboarding data saved successfully');
+    } catch (err) {
+      console.error('Failed to save onboarding data:', err);
+    }
+  };
+
   const nextStep = () => setCurrentStep(prev => prev + 1);
   const prevStep = () => setCurrentStep(prev => Math.max(0, prev - 1));
 
@@ -125,9 +154,20 @@ function AppContent() {
     <PersonalityScreen key="personality" data={userData} update={updateUserData} onNext={nextStep} onBack={prevStep} />,
     <PreferencesScreen key="preferences" data={userData} update={updateUserData} onNext={nextStep} onBack={prevStep} />,
     <StatementScreen key="statement" data={userData} update={updateUserData} onNext={nextStep} onBack={prevStep} />,
-    <LocationScreen key="location" data={userData} update={updateUserData} onNext={nextStep} onBack={prevStep} />,
-    <MatchingScreen key="matching" data={userData} onBack={prevStep} onLogout={handleLogout} />,
+    <LocationScreen key="location" data={userData} update={updateUserData} onNext={() => { saveOnboardingData(); nextStep(); }} onBack={prevStep} />,
+    <MatchingScreen key="matching" data={userData} onBack={prevStep} onLogout={handleLogout} onProfile={() => setShowProfile(true)} />,
   ];
+
+  if (showProfile) {
+    return (
+      <div style={{ minHeight: '100vh' }}>
+        <ProfileScreen
+          onBack={() => setShowProfile(false)}
+          onLogout={handleLogout}
+        />
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh' }}>

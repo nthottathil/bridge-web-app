@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { groupsAPI } from '../services/api';
 
-function ChatScreen({ groupData, userData }) {
+function ChatScreen({ groupData, userData, onProfile }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -145,6 +145,27 @@ function ChatScreen({ groupData, userData }) {
               </div>
             ))}
           </div>
+
+          {/* Profile Button */}
+          <button
+            onClick={onProfile}
+            style={{
+              padding: '8px',
+              borderRadius: '50%',
+              border: '2px solid rgba(255,255,255,0.3)',
+              backgroundColor: 'transparent',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Edit Profile"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </button>
 
           {/* Leave Group Button */}
           <button

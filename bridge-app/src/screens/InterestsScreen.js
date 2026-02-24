@@ -3,11 +3,11 @@ import { SplitLayout, SelectionChip, NavButton } from '../components';
 
 function InterestsScreen({ data, update, onNext, onBack }) {
   const interestCategories = {
-    'Sports & Fitness': ['Running', 'Yoga', 'Football', 'Tennis', 'Gym', 'Swimming', 'Cycling', 'Hiking', 'Other'],
-    'Arts & Culture': ['Music', 'Photography', 'Art', 'Film', 'Theatre', 'Dance', 'Writing', 'Museums', 'Other'],
-    'Tech & Gaming': ['Gaming', 'Programming', 'AI/ML', 'Startups', 'Crypto', 'VR/AR', 'Other'],
-    'Lifestyle': ['Travel', 'Food', 'Fashion', 'Reading', 'Cooking', 'Gardening', 'Meditation', 'Other'],
-    'Social': ['Volunteering', 'Politics', 'Languages', 'Networking', 'Book clubs', 'Other']
+    'Sports & Fitness': ['Running', 'Yoga', 'Football', 'Tennis', 'Gym', 'Swimming', 'Cycling', 'Hiking'],
+    'Arts & Culture': ['Music', 'Photography', 'Art', 'Film', 'Theatre', 'Dance', 'Writing', 'Museums'],
+    'Tech & Gaming': ['Gaming', 'Programming', 'AI/ML', 'Startups', 'Crypto', 'VR/AR'],
+    'Lifestyle': ['Travel', 'Food', 'Fashion', 'Reading', 'Cooking', 'Gardening', 'Meditation'],
+    'Social': ['Volunteering', 'Politics', 'Languages', 'Networking', 'Book clubs']
   };
   
   const toggleInterest = (interest) => {

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { matchingAPI, groupsAPI } from '../services/api';
 import ChatScreen from './ChatScreen';
 
-function MatchingScreen({ data, onBack }) {
+function MatchingScreen({ data, onBack, onLogout, onProfile }) {
   const [matchState, setMatchState] = useState('searching');
   const [matches, setMatches] = useState([]);
+  const [incomingRequests, setIncomingRequests] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,6 +14,14 @@ function MatchingScreen({ data, onBack }) {
   useEffect(() => {
     loadMatches();
     checkExistingGroup();
+    loadIncomingRequests();
+
+    // Poll for incoming requests every 5 seconds
+    const pollInterval = setInterval(() => {
+      loadIncomingRequests();
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   const loadMatches = async () => {
@@ -38,6 +47,40 @@ function MatchingScreen({ data, onBack }) {
       }
     } catch (err) {
       console.error('Error checking group:', err);
+    }
+  };
+
+  const loadIncomingRequests = async () => {
+    try {
+      const requests = await matchingAPI.getMatchRequests();
+      setIncomingRequests(requests);
+    } catch (err) {
+      console.error('Error loading match requests:', err);
+    }
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      const result = await matchingAPI.acceptMatchRequest(requestId);
+      if (result.group_id) {
+        const groupData = await groupsAPI.getMyGroup();
+        if (groupData) {
+          setGroup(groupData);
+        }
+      }
+    } catch (err) {
+      console.error('Error accepting match request:', err);
+      setError(err.response?.data?.detail || 'Failed to accept request');
+    }
+  };
+
+  const handleRejectRequest = async (requestId) => {
+    try {
+      await matchingAPI.rejectMatchRequest(requestId);
+      setIncomingRequests(prev => prev.filter(r => r.request_id !== requestId));
+    } catch (err) {
+      console.error('Error rejecting match request:', err);
+      setError(err.response?.data?.detail || 'Failed to reject request');
     }
   };
 
@@ -72,7 +115,7 @@ function MatchingScreen({ data, onBack }) {
   };
 
   if (group) {
-    return <ChatScreen groupData={group} userData={data} />;
+    return <ChatScreen groupData={group} userData={data} onProfile={onProfile} />;
   }
 
   if (matchState === 'waiting') {
@@ -160,6 +203,18 @@ function MatchingScreen({ data, onBack }) {
         </div>
       ) : (
         <div style={{ maxWidth: '520px', width: '100%' }}>
+          {/* Profile button */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+            <button onClick={onProfile} style={{
+              background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff',
+              cursor: 'pointer', padding: '10px', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }} title="Edit Profile">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </button>
+          </div>
           <h2 style={{
             fontSize: '26px',
             fontWeight: '500',
@@ -167,7 +222,11 @@ function MatchingScreen({ data, onBack }) {
             textAlign: 'center',
             marginBottom: '8px'
           }}>
-            {matches.length > 0 ? 'Your Top 3 Matches!' : 'No matches yet'}
+            {matches.length > 0
+              ? 'Your Top 3 Matches!'
+              : incomingRequests.length > 0
+                ? 'You have match requests!'
+                : 'No matches yet'}
           </h2>
           <p style={{
             fontSize: '16px',
@@ -177,7 +236,9 @@ function MatchingScreen({ data, onBack }) {
           }}>
             {matches.length > 0
               ? 'Pick one to send them a match request'
-              : 'Check back later as more people join Bridge'
+              : incomingRequests.length > 0
+                ? 'Someone wants to connect with you'
+                : 'Check back later as more people join Bridge'
             }
           </p>
 
@@ -191,6 +252,30 @@ function MatchingScreen({ data, onBack }) {
               textAlign: 'center'
             }}>
               {error}
+            </div>
+          )}
+
+          {/* Incoming match requests */}
+          {incomingRequests.length > 0 && (
+            <div style={{ marginBottom: '28px' }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#fff',
+                marginBottom: '12px'
+              }}>
+                Match Requests ({incomingRequests.length})
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {incomingRequests.map(req => (
+                  <IncomingRequestCard
+                    key={req.request_id}
+                    request={req}
+                    onAccept={() => handleAcceptRequest(req.request_id)}
+                    onReject={() => handleRejectRequest(req.request_id)}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
@@ -209,6 +294,125 @@ function MatchingScreen({ data, onBack }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function IncomingRequestCard({ request, onAccept, onReject }) {
+  const { from_user } = request;
+  const [accepting, setAccepting] = useState(false);
+
+  const handleAccept = async () => {
+    setAccepting(true);
+    await onAccept();
+  };
+
+  return (
+    <div style={{
+      backgroundColor: '#fff',
+      borderRadius: '16px',
+      padding: '20px',
+      border: '2px solid #ffd700',
+      animation: 'fadeIn 0.4s ease'
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        marginBottom: '12px'
+      }}>
+        <div style={{
+          width: '52px',
+          height: '52px',
+          borderRadius: '50%',
+          backgroundColor: '#1a5f5a',
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: '600',
+          fontSize: '20px'
+        }}>{from_user.first_name[0]}</div>
+        <div style={{ flex: 1 }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#1a1a1a',
+            margin: 0
+          }}>{from_user.first_name}, {from_user.age}</h3>
+          <p style={{
+            fontSize: '13px',
+            color: '#666',
+            margin: '2px 0 0 0'
+          }}>{from_user.profession} • {from_user.location}</p>
+        </div>
+        <span style={{
+          fontSize: '16px',
+          color: '#1a5f5a',
+          fontWeight: '700'
+        }}>{from_user.compatibility_score}%</span>
+      </div>
+      <p style={{
+        fontSize: '14px',
+        color: '#666',
+        marginBottom: '10px',
+        lineHeight: '1.5'
+      }}>{from_user.statement || 'No bio yet'}</p>
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        flexWrap: 'wrap',
+        marginBottom: '14px'
+      }}>
+        {from_user.interests.slice(0, 5).map(interest => (
+          <span key={interest} style={{
+            fontSize: '12px',
+            padding: '6px 12px',
+            backgroundColor: '#f0f7f6',
+            borderRadius: '12px',
+            color: '#1a5f5a',
+            fontWeight: '500'
+          }}>{interest}</span>
+        ))}
+      </div>
+      <div style={{
+        display: 'flex',
+        gap: '10px',
+        justifyContent: 'flex-end'
+      }}>
+        <button
+          onClick={onReject}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '20px',
+            border: '1px solid #ccc',
+            backgroundColor: '#fff',
+            color: '#666',
+            fontSize: '14px',
+            cursor: 'pointer',
+            fontWeight: '500'
+          }}
+        >
+          Decline
+        </button>
+        <button
+          onClick={handleAccept}
+          disabled={accepting}
+          style={{
+            padding: '10px 24px',
+            borderRadius: '20px',
+            border: 'none',
+            backgroundColor: '#1a5f5a',
+            color: '#fff',
+            fontSize: '14px',
+            cursor: accepting ? 'default' : 'pointer',
+            fontWeight: '600',
+            opacity: accepting ? 0.7 : 1
+          }}
+        >
+          {accepting ? 'Accepting...' : 'Accept'}
+        </button>
+      </div>
     </div>
   );
 }

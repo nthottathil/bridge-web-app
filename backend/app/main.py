@@ -24,7 +24,9 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",  # React development server
         "http://localhost:5173",  # Vite development server (alternative)
-        "https://bridgewebapp.netlify.app",  # Production frontend
+        "https://bridgewebapp.netlify.app",  # Netlify frontend
+        "https://thebridgeapp.online",  # Custom domain
+        "https://www.thebridgeapp.online",  # Custom domain (www)
     ],
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
