@@ -1,121 +1,82 @@
-import React from 'react';
-import { SplitLayout, SelectionChip, NavButton } from '../components';
+import React, { useState } from 'react';
+import { SplitLayout, SelectionChip } from '../components';
+
+const ALL_INTERESTS = [
+  'Fitness', 'Tech', 'Startups', 'AI', 'Books', 'Travel',
+  'Music', 'Photography', 'Film', 'Art', 'Design', 'Writing',
+  'Gaming', 'Cooking', 'Yoga', 'Running', 'Football', 'Tennis',
+  'Cycling', 'Hiking', 'Swimming', 'Dance', 'Theatre', 'Fashion',
+  'Crypto', 'Marketing', 'Finance', 'Volunteering', 'Languages',
+  'Meditation', 'Podcasts', 'Networking', 'Gardening',
+];
 
 function InterestsScreen({ data, update, onNext, onBack }) {
-  const interestCategories = {
-    'Sports & Fitness': ['Running', 'Yoga', 'Football', 'Tennis', 'Gym', 'Swimming', 'Cycling', 'Hiking'],
-    'Arts & Culture': ['Music', 'Photography', 'Art', 'Film', 'Theatre', 'Dance', 'Writing', 'Museums'],
-    'Tech & Gaming': ['Gaming', 'Programming', 'AI/ML', 'Startups', 'Crypto', 'VR/AR'],
-    'Lifestyle': ['Travel', 'Food', 'Fashion', 'Reading', 'Cooking', 'Gardening', 'Meditation'],
-    'Social': ['Volunteering', 'Politics', 'Languages', 'Networking', 'Book clubs']
-  };
-  
+  const [search, setSearch] = useState('');
+
+  const filtered = search
+    ? ALL_INTERESTS.filter(i => i.toLowerCase().includes(search.toLowerCase()))
+    : ALL_INTERESTS;
+
   const toggleInterest = (interest) => {
     const current = [...data.interests];
     const index = current.indexOf(interest);
-
     if (index > -1) {
-      // Remove if already selected
       current.splice(index, 1);
     } else {
-      // Find which category this interest belongs to
-      let category = '';
-      for (const [cat, interests] of Object.entries(interestCategories)) {
-        if (interests.includes(interest)) {
-          category = cat;
-          break;
-        }
-      }
-
-      // Find the first selected interest in this category
-      const categoryInterests = interestCategories[category];
-      const firstSelectedInCategory = current.find(i => categoryInterests.includes(i));
-
-      if (firstSelectedInCategory) {
-        // Insert after the first selected interest in this category
-        const insertIndex = current.indexOf(firstSelectedInCategory) + 1;
-        current.splice(insertIndex, 0, interest);
-      } else {
-        // No interests selected in this category yet, add to beginning
-        current.unshift(interest);
-      }
+      current.push(interest);
     }
     update('interests', current);
   };
 
-  // Helper function to sort interests within a category
-  const sortInterestsInCategory = (interests) => {
-    const selected = interests.filter(i => data.interests.includes(i));
-    const unselected = interests.filter(i => !data.interests.includes(i));
-
-    // Sort selected by their rank (order in data.interests array)
-    selected.sort((a, b) => data.interests.indexOf(a) - data.interests.indexOf(b));
-
-    return [...selected, ...unselected];
-  };
-
   return (
     <SplitLayout
-      progress={71}
-      leftTitle="What makes you tick?"
+      currentTab={2}
+      leftTitle="Your interests"
+      subtitle="Select at least 3 interests. These help us find your people."
       rightContent={
         <div>
-          <h2 style={{
-            fontSize: '26px',
-            fontWeight: '600',
-            color: '#1a1a1a',
-            marginBottom: '8px'
-          }}>Select your interests</h2>
-          <p style={{
-            fontSize: '15px',
-            color: '#666',
-            marginBottom: '24px',
-            lineHeight: '1.5'
-          }}>Choose at least 3. Click to rank - selected items move to the top.</p>
-          <div style={{
-            maxHeight: '380px',
-            overflowY: 'auto',
-            paddingRight: '8px'
-          }}>
-            {Object.entries(interestCategories).map(([category, interests]) => {
-              const sortedInterests = sortInterestsInCategory(interests);
-              return (
-                <div key={category} style={{ marginBottom: '24px' }}>
-                  <h3 style={{
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: '#888',
-                    marginBottom: '12px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.8px'
-                  }}>{category}</h3>
-                  <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '10px'
-                  }}>
-                    {sortedInterests.map(interest => (
-                      <SelectionChip
-                        key={interest}
-                        label={interest}
-                        selected={data.interests.includes(interest)}
-                        onClick={() => toggleInterest(interest)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search interests..."
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              borderRadius: '25px',
+              border: '1.5px solid #ccc',
+              fontSize: '14px',
+              outline: 'none',
+              backgroundColor: 'transparent',
+              marginBottom: '16px',
+            }}
+          />
           <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: '24px'
+            flexWrap: 'wrap',
+            gap: '10px',
+            maxHeight: '320px',
+            overflowY: 'auto',
+            paddingRight: '4px',
           }}>
-            <NavButton onClick={onBack} direction="back" />
-            <NavButton onClick={onNext} disabled={data.interests.length < 3} />
+            {filtered.map(interest => (
+              <SelectionChip
+                key={interest}
+                label={interest}
+                selected={data.interests.includes(interest)}
+                onClick={() => toggleInterest(interest)}
+              />
+            ))}
           </div>
+          {data.interests.length > 0 && (
+            <p style={{
+              fontSize: '13px',
+              color: '#555',
+              marginTop: '12px',
+            }}>
+              {data.interests.length} selected
+            </p>
+          )}
         </div>
       }
     />
