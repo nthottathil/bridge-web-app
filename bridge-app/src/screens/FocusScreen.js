@@ -11,7 +11,6 @@ const FOCUS_OPTIONS = [
 ];
 
 function FocusScreen({ data, update, onNext, onBack }) {
-  const selected = FOCUS_OPTIONS.find(o => o.label === data.focus);
 
   return (
     <SplitLayout

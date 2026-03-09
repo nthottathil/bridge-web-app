@@ -1,10 +1,8 @@
 import React from 'react';
-import { SplitLayout, TextInput, Checkbox, FloatingNav, NavButton } from '../components';
+import { SplitLayout, TextInput, Checkbox } from '../components';
 
 function IntroducingScreen({ data, update, onNext, onBack }) {
   const genderOptions = ['Male', 'Female', 'Non-binary', 'Prefer not to say'];
-
-  const canProceed = data.firstName && data.surname && data.profession && data.age >= 18;
 
   return (
     <SplitLayout

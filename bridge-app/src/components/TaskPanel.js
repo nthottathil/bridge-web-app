@@ -9,6 +9,7 @@ function TaskPanel({ groupId, currentUserId }) {
 
   useEffect(() => {
     loadTasks();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId]);
 
   const loadTasks = async () => {

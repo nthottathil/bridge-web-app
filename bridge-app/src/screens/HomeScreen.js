@@ -6,12 +6,13 @@ import { groupsAPI } from '../services/api';
 
 function HomeScreen({ userData, groupData, onProfile, onChat }) {
   const [lastMessage, setLastMessage] = useState(null);
-  const [events, setEvents] = useState([]);
+  const [events] = useState([]);
 
   useEffect(() => {
     if (groupData?.group_id) {
       loadLastMessage();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupData]);
 
   const loadLastMessage = async () => {
