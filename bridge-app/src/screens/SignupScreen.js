@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { SplitLayout, TextInput } from '../components';
+import { TextInput } from '../components';
+import { theme } from '../theme';
+import BridgeLogo from '../components/BridgeLogo';
 import { useAuth } from '../context/AuthContext';
 
 function SignupScreen({ data, update, onNext, onSwitchToLogin }) {
@@ -17,40 +19,18 @@ function SignupScreen({ data, update, onNext, onSwitchToLogin }) {
   const canProceed = data.firstName.trim() && data.surname.trim() && data.email && data.age && passwordValid && passwordsMatch;
 
   const handleSendVerification = async () => {
-    if (!isValidEmail) {
-      setShowError('Please enter a valid email address');
-      return;
-    }
-    if (!data.firstName.trim()) {
-      setShowError('Please enter your first name');
-      return;
-    }
-    if (!data.surname.trim()) {
-      setShowError('Please enter your surname');
-      return;
-    }
-    if (!data.age || data.age < 18) {
-      setShowError('You must be at least 18 years old');
-      return;
-    }
-    if (!data.profession.trim()) {
-      setShowError('Please enter your profession');
-      return;
-    }
-    if (!passwordValid) {
-      setShowError('Password must be at least 8 characters long');
-      return;
-    }
-    if (!passwordsMatch) {
-      setShowError('Passwords do not match');
-      return;
-    }
+    if (!isValidEmail) { setShowError('Please enter a valid email address'); return; }
+    if (!data.firstName.trim()) { setShowError('Please enter your first name'); return; }
+    if (!data.surname.trim()) { setShowError('Please enter your surname'); return; }
+    if (!data.age || data.age < 18) { setShowError('You must be at least 18 years old'); return; }
+    if (!data.profession.trim()) { setShowError('Please enter your profession'); return; }
+    if (!passwordValid) { setShowError('Password must be at least 8 characters long'); return; }
+    if (!passwordsMatch) { setShowError('Passwords do not match'); return; }
 
     setLoading(true);
     setShowError('');
 
     try {
-      // Call real signup API
       await signup({
         email: data.email,
         password: password,
@@ -64,20 +44,17 @@ function SignupScreen({ data, update, onNext, onSwitchToLogin }) {
           extroversion: Math.round(data.personality.extroversion / 10),
           openness: Math.round(data.personality.openness / 10),
           agreeableness: Math.round(data.personality.agreeableness / 10),
-          conscientiousness: Math.round(data.personality.conscientiousness / 10)
+          conscientiousness: Math.round(data.personality.conscientiousness / 10),
         },
         gender_preference: data.genderPreference || ['any'],
         age_preference: data.agePreference || { min: 18, max: 99 },
         statement: data.statement || '',
         location: data.location || 'London',
-        max_distance: data.maxDistance || 5
+        max_distance: data.maxDistance || 5,
       });
-
-      console.log('Verification email sent to:', data.email);
       setEmailSent(true);
     } catch (error) {
-      console.error('Signup error:', error);
-      setShowError(error.response?.data?.detail || 'Failed to send verification email. Please try again.');
+      setShowError(error.response?.data?.detail || 'Failed to send verification email.');
     } finally {
       setLoading(false);
     }
@@ -88,165 +65,108 @@ function SignupScreen({ data, update, onNext, onSwitchToLogin }) {
       setShowError('Please enter the 6-digit verification code');
       return;
     }
-
     setLoading(true);
     setShowError('');
-
     try {
       await verify(data.email, verificationCode);
       onNext();
     } catch (error) {
-      console.error('Verification error:', error);
-      setShowError(error.response?.data?.detail || 'Invalid verification code. Please try again.');
+      setShowError(error.response?.data?.detail || 'Invalid verification code.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SplitLayout
-      progress={0}
-      leftTitle="Let's get started with your details..."
-      rightContent={
-        <div>
-          <h2 style={{
-            fontSize: '26px',
-            fontWeight: '600',
-            color: '#1a1a1a',
-            marginBottom: '24px'
-          }}>Sign Up for Bridge</h2>
+    <div style={{
+      minHeight: '100vh',
+      background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+      padding: '40px 16px 80px',
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '430px',
+        animation: 'fadeIn 0.4s ease',
+      }}>
+        <div style={{ marginBottom: '24px' }}><BridgeLogo /></div>
+        <h1 style={{
+          fontSize: '26px', fontWeight: '600',
+          color: theme.colors.textDark, marginBottom: '8px',
+        }}>Create your account</h1>
+        <p style={{
+          fontSize: '14px', color: theme.colors.textMedium,
+          marginBottom: '24px',
+        }}>Join Bridge and find your people</p>
 
+        <div style={{
+          backgroundColor: theme.colors.surfaceCard,
+          borderRadius: theme.borderRadius.card,
+          padding: '24px 20px',
+          backdropFilter: 'blur(10px)',
+        }}>
           {!emailSent ? (
             <>
+              <TextInput label="First name" value={data.firstName} onChange={v => update('firstName', v)} placeholder="John" />
+              <TextInput label="Surname" value={data.surname} onChange={v => update('surname', v)} placeholder="Smith" />
+              <TextInput label="Email address" type="email" value={data.email} onChange={v => update('email', v)} placeholder="you@example.com" />
               <TextInput
-                label="First name"
-                value={data.firstName}
-                onChange={v => update('firstName', v)}
-                placeholder="John"
-              />
-              <TextInput
-                label="Surname"
-                value={data.surname}
-                onChange={v => update('surname', v)}
-                placeholder="Smith"
-              />
-              <TextInput
-                label="Email address"
-                type="email"
-                value={data.email}
-                onChange={v => update('email', v)}
-                placeholder="you@example.com"
-              />
-              <TextInput
-                label="Age"
-                type="text"
+                label="Age" type="text"
                 value={data.age || ''}
-                onChange={v => {
-                  const numValue = v.replace(/\D/g, '');
-                  update('age', numValue ? parseInt(numValue) : 0);
-                }}
+                onChange={v => { const n = v.replace(/\D/g, ''); update('age', n ? parseInt(n) : 0); }}
                 placeholder="25"
               />
-              <TextInput
-                label="Profession"
-                value={data.profession}
-                onChange={v => update('profession', v)}
-                placeholder="Software Engineer"
-              />
-              <TextInput
-                label="Password"
-                type="password"
-                value={password}
-                onChange={v => setPassword(v)}
-                placeholder="At least 8 characters"
-              />
-              <TextInput
-                label="Confirm Password"
-                type="password"
-                value={confirmPassword}
-                onChange={v => setConfirmPassword(v)}
-                placeholder="Re-enter your password"
-              />
+              <TextInput label="Profession" value={data.profession} onChange={v => update('profession', v)} placeholder="Software Engineer" />
+              <TextInput label="Password" type="password" value={password} onChange={v => setPassword(v)} placeholder="At least 8 characters" />
+              <TextInput label="Confirm Password" type="password" value={confirmPassword} onChange={v => setConfirmPassword(v)} placeholder="Re-enter your password" />
 
               {showError && (
                 <div style={{
-                  marginTop: '16px',
-                  padding: '12px 16px',
-                  backgroundColor: '#fee',
-                  border: '1px solid #fcc',
-                  borderRadius: '8px',
-                  color: '#c33',
-                  fontSize: '14px'
-                }}>
-                  {showError}
-                </div>
+                  padding: '12px', backgroundColor: theme.colors.errorBg,
+                  borderRadius: '8px', color: theme.colors.error,
+                  fontSize: '14px', marginTop: '12px',
+                }}>{showError}</div>
               )}
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '40px',
-                gap: '16px'
+              <button
+                onClick={handleSendVerification}
+                disabled={!canProceed || loading}
+                style={{
+                  width: '100%', padding: '14px',
+                  borderRadius: '25px', border: 'none',
+                  backgroundColor: canProceed && !loading ? theme.colors.primary : '#ccc',
+                  color: '#fff', fontSize: '15px', fontWeight: '600',
+                  cursor: canProceed && !loading ? 'pointer' : 'not-allowed',
+                  marginTop: '20px',
+                }}
+              >
+                {loading ? 'Sending...' : 'Send Verification Email'}
+              </button>
+
+              <p style={{
+                textAlign: 'center', fontSize: '14px',
+                color: theme.colors.textMedium, marginTop: '16px',
               }}>
-                {onSwitchToLogin && (
-                  <button
-                    onClick={onSwitchToLogin}
-                    style={{
-                      padding: '12px 24px',
-                      borderRadius: '20px',
-                      border: '2px solid #1a5f5a',
-                      backgroundColor: 'transparent',
-                      color: '#1a5f5a',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      fontWeight: '500',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#f0f7f6';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    Already have an account?
-                  </button>
-                )}
-                <button
-                  onClick={handleSendVerification}
-                  disabled={!canProceed || loading}
-                  style={{
-                    padding: '12px 24px',
-                    borderRadius: '24px',
-                    border: 'none',
-                    backgroundColor: canProceed && !loading ? '#1a5f5a' : '#ccc',
-                    color: '#fff',
-                    fontSize: '15px',
-                    cursor: canProceed && !loading ? 'pointer' : 'not-allowed',
-                    fontWeight: '500'
-                  }}
-                >
-                  {loading ? 'Sending...' : 'Send Verification Email'}
+                Already have an account?{' '}
+                <button onClick={onSwitchToLogin} style={{
+                  background: 'none', border: 'none',
+                  color: theme.colors.primary, cursor: 'pointer',
+                  fontWeight: '600', fontSize: '14px', textDecoration: 'underline',
+                }}>
+                  Log in
                 </button>
-              </div>
+              </p>
             </>
           ) : (
             <>
               <div style={{
-                padding: '16px',
-                backgroundColor: '#e8f5e9',
-                borderRadius: '12px',
-                marginBottom: '24px'
+                padding: '14px', backgroundColor: theme.colors.successBg,
+                borderRadius: '12px', marginBottom: '20px',
               }}>
-                <p style={{
-                  fontSize: '15px',
-                  color: '#2e7d32',
-                  margin: 0,
-                  lineHeight: '1.5'
-                }}>
-                  We've sent a verification code to <strong>{data.email}</strong>.
-                  Please check your inbox and enter the code below.
+                <p style={{ fontSize: '14px', color: theme.colors.success, margin: 0, lineHeight: '1.5' }}>
+                  We've sent a verification code to <strong>{data.email}</strong>. Check your inbox.
                 </p>
               </div>
 
@@ -260,82 +180,52 @@ function SignupScreen({ data, update, onNext, onSwitchToLogin }) {
 
               {showError && (
                 <div style={{
-                  marginTop: '16px',
-                  padding: '12px 16px',
-                  backgroundColor: '#fee',
-                  border: '1px solid #fcc',
-                  borderRadius: '8px',
-                  color: '#c33',
-                  fontSize: '14px'
-                }}>
-                  {showError}
-                </div>
+                  padding: '12px', backgroundColor: theme.colors.errorBg,
+                  borderRadius: '8px', color: theme.colors.error,
+                  fontSize: '14px', marginTop: '12px',
+                }}>{showError}</div>
               )}
 
-              <p style={{
-                fontSize: '13px',
-                color: '#888',
-                marginTop: '16px'
-              }}>
+              <p style={{ fontSize: '13px', color: theme.colors.textLight, marginTop: '12px' }}>
                 Didn't receive it?{' '}
-                <button
-                  onClick={handleSendVerification}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#1a5f5a',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    fontSize: '13px'
-                  }}
-                >
-                  Resend code
-                </button>
+                <button onClick={handleSendVerification} style={{
+                  background: 'none', border: 'none',
+                  color: theme.colors.primary, cursor: 'pointer',
+                  textDecoration: 'underline', fontSize: '13px',
+                }}>Resend code</button>
               </p>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '40px'
-              }}>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
                 <button
                   onClick={() => setEmailSent(false)}
                   style={{
-                    padding: '12px 24px',
-                    borderRadius: '24px',
-                    border: '2px solid #1a5f5a',
-                    backgroundColor: '#fff',
-                    color: '#1a5f5a',
-                    fontSize: '15px',
-                    cursor: 'pointer',
-                    fontWeight: '500'
+                    flex: 1, padding: '12px', borderRadius: '25px',
+                    border: `1.5px solid ${theme.colors.primary}`,
+                    backgroundColor: 'transparent', color: theme.colors.primary,
+                    fontSize: '14px', cursor: 'pointer', fontWeight: '500',
                   }}
                 >
-                  ← Edit Details
+                  Edit Details
                 </button>
                 <button
                   onClick={handleVerifyAndNext}
                   disabled={verificationCode.length !== 6 || loading}
                   style={{
-                    padding: '12px 24px',
-                    borderRadius: '24px',
+                    flex: 1, padding: '12px', borderRadius: '25px',
                     border: 'none',
-                    backgroundColor: verificationCode.length === 6 && !loading ? '#1a5f5a' : '#ccc',
-                    color: '#fff',
-                    fontSize: '15px',
+                    backgroundColor: verificationCode.length === 6 && !loading ? theme.colors.primary : '#ccc',
+                    color: '#fff', fontSize: '14px', fontWeight: '600',
                     cursor: verificationCode.length === 6 && !loading ? 'pointer' : 'not-allowed',
-                    fontWeight: '500'
                   }}
                 >
-                  {loading ? 'Verifying...' : 'Verify & Continue →'}
+                  {loading ? 'Verifying...' : 'Verify & Continue'}
                 </button>
               </div>
             </>
           )}
         </div>
-      }
-    />
+      </div>
+    </div>
   );
 }
 
