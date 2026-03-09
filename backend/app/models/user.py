@@ -29,6 +29,18 @@ class User(Base):
     # User statement
     statement = Column(Text, nullable=True)
 
+    # New onboarding fields
+    gender = Column(String, nullable=True)
+    focus = Column(String, nullable=True)
+    headline = Column(Text, nullable=True)
+    commitment_level = Column(String, nullable=True)
+    deal_breakers = Column(JSON, nullable=True)
+    perspective_answers = Column(JSON, nullable=True)
+    profile_photo_url = Column(String, nullable=True)
+    age_collab_only = Column(Boolean, nullable=True, default=False)
+    gender_collab_only = Column(Boolean, nullable=True, default=False)
+    country = Column(String, nullable=True)
+
     # Location
     location = Column(String, nullable=False)
     max_distance = Column(Integer, nullable=False, default=5)

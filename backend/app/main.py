@@ -3,12 +3,41 @@ Bridge API - FastAPI application entry point
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text, inspect
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api import auth, matches, groups, user
+from app.api import auth, matches, groups, user, events, tasks
+from app.models import event, task  # ensure new tables are registered
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+# Add missing columns to existing tables (safe for re-runs)
+def add_missing_columns():
+    inspector = inspect(engine)
+    if 'users' in inspector.get_table_names():
+        existing = {col['name'] for col in inspector.get_columns('users')}
+        new_cols = {
+            'gender': 'VARCHAR',
+            'focus': 'VARCHAR',
+            'headline': 'TEXT',
+            'commitment_level': 'VARCHAR',
+            'deal_breakers': 'JSON',
+            'perspective_answers': 'JSON',
+            'profile_photo_url': 'VARCHAR',
+            'age_collab_only': 'BOOLEAN',
+            'gender_collab_only': 'BOOLEAN',
+            'country': 'VARCHAR',
+        }
+        with engine.begin() as conn:
+            for col_name, col_type in new_cols.items():
+                if col_name not in existing:
+                    conn.execute(text(f'ALTER TABLE users ADD COLUMN {col_name} {col_type}'))
+
+try:
+    add_missing_columns()
+except Exception as e:
+    print(f"Column migration note: {e}")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -38,6 +67,8 @@ app.include_router(auth.router)
 app.include_router(matches.router)
 app.include_router(groups.router)
 app.include_router(user.router)
+app.include_router(events.router)
+app.include_router(tasks.router)
 
 # Health check endpoint
 @app.get("/")

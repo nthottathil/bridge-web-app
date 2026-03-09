@@ -277,7 +277,10 @@ def find_potential_matches(db: Session, user: User, limit: int = 20) -> List[Dic
                 'interests': other_user.interests,
                 'compatibility_score': compatibility,
                 'location': other_user.location,
-                'primary_goal': other_user.primary_goal
+                'primary_goal': other_user.primary_goal,
+                'focus': getattr(other_user, 'focus', None),
+                'headline': getattr(other_user, 'headline', None),
+                'profile_photo_url': getattr(other_user, 'profile_photo_url', None),
             })
 
     # Sort by compatibility score (highest first)

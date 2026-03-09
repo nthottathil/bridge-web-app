@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from datetime import datetime
 
 
@@ -30,6 +30,15 @@ class UserCreate(BaseModel):
     statement: Optional[str] = None
     location: str
     max_distance: int = 5
+    gender: Optional[str] = None
+    focus: Optional[str] = None
+    headline: Optional[str] = None
+    commitment_level: Optional[str] = None
+    deal_breakers: Optional[List[str]] = None
+    perspective_answers: Optional[Dict[str, Any]] = None
+    age_collab_only: Optional[bool] = False
+    gender_collab_only: Optional[bool] = False
+    country: Optional[str] = None
 
 
 class UserLogin(BaseModel):
@@ -68,6 +77,16 @@ class UserProfile(BaseModel):
     statement: Optional[str]
     location: str
     max_distance: int
+    gender: Optional[str] = None
+    focus: Optional[str] = None
+    headline: Optional[str] = None
+    commitment_level: Optional[str] = None
+    deal_breakers: Optional[List[str]] = None
+    perspective_answers: Optional[Dict[str, Any]] = None
+    profile_photo_url: Optional[str] = None
+    age_collab_only: Optional[bool] = None
+    gender_collab_only: Optional[bool] = None
+    country: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -86,6 +105,16 @@ class UserProfileUpdate(BaseModel):
     statement: Optional[str] = None
     location: Optional[str] = None
     max_distance: Optional[int] = None
+    gender: Optional[str] = None
+    focus: Optional[str] = None
+    headline: Optional[str] = None
+    commitment_level: Optional[str] = None
+    deal_breakers: Optional[List[str]] = None
+    perspective_answers: Optional[Dict[str, Any]] = None
+    profile_photo_url: Optional[str] = None
+    age_collab_only: Optional[bool] = None
+    gender_collab_only: Optional[bool] = None
+    country: Optional[str] = None
 
 
 class Token(BaseModel):

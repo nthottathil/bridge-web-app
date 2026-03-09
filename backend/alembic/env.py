@@ -12,6 +12,8 @@ from app.models.user import User
 from app.models.group import Group, GroupMember
 from app.models.match import MatchRequest
 from app.models.message import Message
+from app.models.event import CalendarEvent
+from app.models.task import GroupTask, GroupTaskCompletion
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
