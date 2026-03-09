@@ -36,7 +36,7 @@ class User(Base):
     commitment_level = Column(String, nullable=True)
     deal_breakers = Column(JSON, nullable=True)
     perspective_answers = Column(JSON, nullable=True)
-    profile_photo_url = Column(String, nullable=True)
+    profile_photo_url = Column(Text, nullable=True)
     age_collab_only = Column(Boolean, nullable=True, default=False)
     gender_collab_only = Column(Boolean, nullable=True, default=False)
     country = Column(String, nullable=True)

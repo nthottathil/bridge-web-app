@@ -52,6 +52,7 @@ function AppContent() {
     focus: '',
     headline: '',
     statement: '',
+    profilePhoto: '',
 
     primaryGoal: '',
 
@@ -114,6 +115,7 @@ function AppContent() {
       ageCollabOnly: profile.age_collab_only || prev.ageCollabOnly,
       genderCollabOnly: profile.gender_collab_only || prev.genderCollabOnly,
       country: profile.country || prev.country,
+      profilePhoto: profile.profile_photo_url || prev.profilePhoto,
     }));
     setCurrentStep(TOTAL_STEPS); // Go to matching
   };
@@ -158,6 +160,7 @@ function AppContent() {
         age_collab_only: userData.ageCollabOnly || false,
         gender_collab_only: userData.genderCollabOnly || false,
         country: userData.country || '',
+        profile_photo_url: userData.profilePhoto || '',
       });
       console.log('Onboarding data saved successfully');
     } catch (err) {

@@ -24,7 +24,7 @@ def add_missing_columns():
             'commitment_level': 'VARCHAR',
             'deal_breakers': 'JSON',
             'perspective_answers': 'JSON',
-            'profile_photo_url': 'VARCHAR',
+            'profile_photo_url': 'TEXT',
             'age_collab_only': 'BOOLEAN',
             'gender_collab_only': 'BOOLEAN',
             'country': 'VARCHAR',
