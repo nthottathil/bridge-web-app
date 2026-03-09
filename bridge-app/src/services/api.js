@@ -144,4 +144,35 @@ export const groupsAPI = {
   },
 };
 
+// Events API
+export const eventsAPI = {
+  getEvents: async (groupId) => {
+    const response = await api.get(`/api/events/${groupId}`);
+    return response.data;
+  },
+
+  createEvent: async (eventData) => {
+    const response = await api.post('/api/events/', eventData);
+    return response.data;
+  },
+
+  deleteEvent: async (eventId) => {
+    const response = await api.delete(`/api/events/${eventId}`);
+    return response.data;
+  },
+};
+
+// Tasks API
+export const tasksAPI = {
+  getTasks: async (groupId) => {
+    const response = await api.get(`/api/tasks/${groupId}`);
+    return response.data;
+  },
+
+  completeTask: async (taskId) => {
+    const response = await api.post(`/api/tasks/${taskId}/complete`);
+    return response.data;
+  },
+};
+
 export default api;
