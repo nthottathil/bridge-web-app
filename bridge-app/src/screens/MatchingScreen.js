@@ -1,26 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { matchingAPI, groupsAPI } from '../services/api';
+import { theme } from '../theme';
+import BridgeLogo from '../components/BridgeLogo';
 import ChatScreen from './ChatScreen';
 
 function MatchingScreen({ data, onBack, onLogout, onProfile }) {
   const [matchState, setMatchState] = useState('searching');
   const [matches, setMatches] = useState([]);
   const [incomingRequests, setIncomingRequests] = useState([]);
-  const [selectedMatch, setSelectedMatch] = useState(null);
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     loadMatches();
     checkExistingGroup();
     loadIncomingRequests();
-
-    // Poll for incoming requests every 5 seconds
-    const pollInterval = setInterval(() => {
-      loadIncomingRequests();
-    }, 5000);
-
+    const pollInterval = setInterval(() => loadIncomingRequests(), 5000);
     return () => clearInterval(pollInterval);
   }, []);
 
@@ -42,9 +41,7 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
   const checkExistingGroup = async () => {
     try {
       const groupData = await groupsAPI.getMyGroup();
-      if (groupData) {
-        setGroup(groupData);
-      }
+      if (groupData) setGroup(groupData);
     } catch (err) {
       console.error('Error checking group:', err);
     }
@@ -64,12 +61,9 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
       const result = await matchingAPI.acceptMatchRequest(requestId);
       if (result.group_id) {
         const groupData = await groupsAPI.getMyGroup();
-        if (groupData) {
-          setGroup(groupData);
-        }
+        if (groupData) setGroup(groupData);
       }
     } catch (err) {
-      console.error('Error accepting match request:', err);
       setError(err.response?.data?.detail || 'Failed to accept request');
     }
   };
@@ -79,20 +73,17 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
       await matchingAPI.rejectMatchRequest(requestId);
       setIncomingRequests(prev => prev.filter(r => r.request_id !== requestId));
     } catch (err) {
-      console.error('Error rejecting match request:', err);
       setError(err.response?.data?.detail || 'Failed to reject request');
     }
   };
 
-  const handleSelectMatch = async (match) => {
+  const handleBridge = async (match) => {
     setSelectedMatch(match);
-    setMatchState('sending');
-
     try {
       await matchingAPI.sendMatchRequest(match.user_id);
-      setMatchState('waiting');
+      setShowConfirm(true);
 
-      // Poll for group creation every 2 seconds
+      // Poll for group creation
       const pollInterval = setInterval(async () => {
         try {
           const groupData = await groupsAPI.getMyGroup();
@@ -100,200 +91,193 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
             setGroup(groupData);
             clearInterval(pollInterval);
           }
-        } catch (err) {
-          console.error('Error polling for group:', err);
-        }
+        } catch (err) {}
       }, 2000);
-
-      // Stop polling after 30 seconds
       setTimeout(() => clearInterval(pollInterval), 30000);
     } catch (err) {
-      console.error('Error sending match request:', err);
       setError(err.response?.data?.detail || 'Failed to send match request');
-      setMatchState('found');
     }
   };
 
+  // If user is in a group, show chat
   if (group) {
     return <ChatScreen groupData={group} userData={data} onProfile={onProfile} />;
   }
 
-  if (matchState === 'waiting') {
+  // Confirmation screen after bridging
+  if (showConfirm) {
     return (
       <div style={{
         minHeight: '100vh',
+        background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#1a5f5a',
-        padding: '24px'
+        padding: '24px',
       }}>
-        <div style={{ textAlign: 'center', color: '#fff', maxWidth: '400px' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            border: '3px solid rgba(255,255,255,0.2)',
-            borderTop: '3px solid #fff',
-            borderRadius: '50%',
-            margin: '0 auto 28px',
-            animation: 'spin 1s linear infinite'
-          }} />
+        <div style={{
+          textAlign: 'center',
+          maxWidth: '400px',
+          animation: 'fadeIn 0.5s ease',
+        }}>
+          <div style={{ marginBottom: '24px' }}><BridgeLogo /></div>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: theme.colors.textDark,
+            marginBottom: '12px',
+          }}>Yay!!</h1>
           <h2 style={{
-            fontSize: '24px',
+            fontSize: '20px',
             fontWeight: '500',
-            marginBottom: '8px'
-          }}>Waiting for {selectedMatch.first_name} to accept...</h2>
+            color: theme.colors.textDark,
+            marginBottom: '8px',
+          }}>The selection is done.</h2>
           <p style={{
-            fontSize: '16px',
-            opacity: 0.8,
-            marginBottom: '20px'
-          }}>Your group will form when they accept your request</p>
+            fontSize: '15px',
+            color: theme.colors.textMedium,
+            marginBottom: '32px',
+            lineHeight: '1.5',
+          }}>
+            We've sent your bridge request to {selectedMatch?.first_name}. When they accept, your group will form!
+          </p>
           <button
             onClick={() => {
+              setShowConfirm(false);
               setMatchState('found');
-              setSelectedMatch(null);
             }}
             style={{
-              padding: '10px 20px',
-              borderRadius: '20px',
-              border: '2px solid #fff',
-              backgroundColor: 'transparent',
+              padding: '14px 32px',
+              borderRadius: '25px',
+              border: 'none',
+              backgroundColor: theme.colors.primary,
               color: '#fff',
-              fontSize: '14px',
+              fontSize: '16px',
+              fontWeight: '600',
               cursor: 'pointer',
-              fontWeight: '500'
             }}
           >
-            ← Back to matches
+            Back to matches
           </button>
         </div>
       </div>
     );
   }
 
+  // Loading / searching state
+  if (matchState === 'searching' || loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '56px', height: '56px',
+            border: `3px solid ${theme.colors.borderLight}`,
+            borderTop: `3px solid ${theme.colors.primary}`,
+            borderRadius: '50%',
+            margin: '0 auto 24px',
+            animation: 'spin 1s linear infinite',
+          }} />
+          <h2 style={{ fontSize: '22px', fontWeight: '500', color: theme.colors.textDark, marginBottom: '8px' }}>
+            Finding your perfect matches...
+          </h2>
+          <p style={{ fontSize: '15px', color: theme.colors.textMedium }}>Analysing compatibility</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Main matching screen with card carousel
   return (
     <div style={{
       minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#1a5f5a',
-      padding: '24px'
+      background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
+      padding: '20px 16px',
     }}>
-      {matchState === 'searching' || loading ? (
-        <div style={{ textAlign: 'center', color: '#fff' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            border: '3px solid rgba(255,255,255,0.2)',
-            borderTop: '3px solid #fff',
-            borderRadius: '50%',
-            margin: '0 auto 28px',
-            animation: 'spin 1s linear infinite'
-          }} />
-          <h2 style={{
-            fontSize: '24px',
-            fontWeight: '500',
-            marginBottom: '8px'
-          }}>Finding your perfect matches...</h2>
-          <p style={{
-            fontSize: '16px',
-            opacity: 0.8
-          }}>Analysing compatibility</p>
-        </div>
-      ) : (
-        <div style={{ maxWidth: '520px', width: '100%' }}>
-          {/* Profile button */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+      <div style={{ maxWidth: '430px', margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <BridgeLogo />
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={onProfile} style={{
-              background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff',
-              cursor: 'pointer', padding: '10px', borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }} title="Edit Profile">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              width: '40px', height: '40px', borderRadius: '50%',
+              background: 'rgba(255,255,255,0.6)', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={theme.colors.primary}>
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
             </button>
-          </div>
-          <h2 style={{
-            fontSize: '26px',
-            fontWeight: '500',
-            color: '#fff',
-            textAlign: 'center',
-            marginBottom: '8px'
-          }}>
-            {matches.length > 0
-              ? 'Your Top 3 Matches!'
-              : incomingRequests.length > 0
-                ? 'You have match requests!'
-                : 'No matches yet'}
-          </h2>
-          <p style={{
-            fontSize: '16px',
-            color: 'rgba(255,255,255,0.8)',
-            textAlign: 'center',
-            marginBottom: '32px'
-          }}>
-            {matches.length > 0
-              ? 'Pick one to send them a match request'
-              : incomingRequests.length > 0
-                ? 'Someone wants to connect with you'
-                : 'Check back later as more people join Bridge'
-            }
-          </p>
-
-          {error && (
-            <div style={{
-              padding: '14px',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              borderRadius: '12px',
-              color: '#fff',
-              marginBottom: '20px',
-              textAlign: 'center'
+            <button onClick={onLogout} style={{
+              width: '40px', height: '40px', borderRadius: '50%',
+              background: 'rgba(255,255,255,0.6)', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              {error}
-            </div>
-          )}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.primary}>
+                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-          {/* Incoming match requests */}
-          {incomingRequests.length > 0 && (
-            <div style={{ marginBottom: '28px' }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#fff',
-                marginBottom: '12px'
-              }}>
-                Match Requests ({incomingRequests.length})
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {incomingRequests.map(req => (
-                  <IncomingRequestCard
-                    key={req.request_id}
-                    request={req}
-                    onAccept={() => handleAcceptRequest(req.request_id)}
-                    onReject={() => handleRejectRequest(req.request_id)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
+        {error && (
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px'
-          }}>
-            {matches.map(match => (
-              <MatchCard
-                key={match.user_id}
-                match={match}
-                onClick={() => handleSelectMatch(match)}
+            padding: '12px 16px', backgroundColor: theme.colors.errorBg,
+            borderRadius: '12px', color: theme.colors.error, marginBottom: '16px',
+            fontSize: '14px', textAlign: 'center',
+          }}>{error}</div>
+        )}
+
+        {/* Incoming match requests */}
+        {incomingRequests.length > 0 && (
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '600', color: theme.colors.textDark, marginBottom: '12px' }}>
+              Match Requests ({incomingRequests.length})
+            </h3>
+            {incomingRequests.map(req => (
+              <IncomingRequestCard
+                key={req.request_id}
+                request={req}
+                onAccept={() => handleAcceptRequest(req.request_id)}
+                onReject={() => handleRejectRequest(req.request_id)}
               />
             ))}
           </div>
+        )}
+
+        {/* Match cards carousel */}
+        <h2 style={{
+          fontSize: '22px', fontWeight: '600', color: theme.colors.textDark,
+          marginBottom: '4px',
+        }}>
+          {matches.length > 0 ? 'Your Matches' : 'No matches yet'}
+        </h2>
+        <p style={{ fontSize: '14px', color: theme.colors.textMedium, marginBottom: '20px' }}>
+          {matches.length > 0 ? 'Swipe through and bridge with someone' : 'Check back later as more people join'}
+        </p>
+
+        <div
+          ref={scrollRef}
+          style={{
+            display: 'flex',
+            gap: '16px',
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            paddingBottom: '12px',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {matches.map(match => (
+            <MatchCard key={match.user_id} match={match} onBridge={() => handleBridge(match)} />
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -309,191 +293,123 @@ function IncomingRequestCard({ request, onAccept, onReject }) {
 
   return (
     <div style={{
-      backgroundColor: '#fff',
+      backgroundColor: theme.colors.surfaceWhite,
       borderRadius: '16px',
-      padding: '20px',
-      border: '2px solid #ffd700',
-      animation: 'fadeIn 0.4s ease'
+      padding: '18px',
+      border: `2px solid ${theme.colors.gold}`,
+      marginBottom: '12px',
+      animation: 'fadeIn 0.4s ease',
     }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '14px',
-        marginBottom: '12px'
-      }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
         <div style={{
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          backgroundColor: '#1a5f5a',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: '600',
-          fontSize: '20px'
+          width: '48px', height: '48px', borderRadius: '50%',
+          backgroundColor: theme.colors.primary, color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: '600', fontSize: '18px',
         }}>{from_user.first_name[0]}</div>
         <div style={{ flex: 1 }}>
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#1a1a1a',
-            margin: 0
-          }}>{from_user.first_name}, {from_user.age}</h3>
-          <p style={{
-            fontSize: '13px',
-            color: '#666',
-            margin: '2px 0 0 0'
-          }}>{from_user.profession} • {from_user.location}</p>
+          <h3 style={{ fontSize: '16px', fontWeight: '600', color: theme.colors.textDark, margin: 0 }}>
+            {from_user.first_name}, {from_user.age}
+          </h3>
+          <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '2px 0 0' }}>
+            {from_user.profession} · {from_user.location}
+          </p>
         </div>
-        <span style={{
-          fontSize: '16px',
-          color: '#1a5f5a',
-          fontWeight: '700'
-        }}>{from_user.compatibility_score}%</span>
+        <span style={{ fontSize: '15px', color: theme.colors.primary, fontWeight: '700' }}>
+          {from_user.compatibility_score}%
+        </span>
       </div>
-      <p style={{
-        fontSize: '14px',
-        color: '#666',
-        marginBottom: '10px',
-        lineHeight: '1.5'
-      }}>{from_user.statement || 'No bio yet'}</p>
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        flexWrap: 'wrap',
-        marginBottom: '14px'
-      }}>
-        {from_user.interests.slice(0, 5).map(interest => (
-          <span key={interest} style={{
-            fontSize: '12px',
-            padding: '6px 12px',
-            backgroundColor: '#f0f7f6',
-            borderRadius: '12px',
-            color: '#1a5f5a',
-            fontWeight: '500'
-          }}>{interest}</span>
-        ))}
-      </div>
-      <div style={{
-        display: 'flex',
-        gap: '10px',
-        justifyContent: 'flex-end'
-      }}>
-        <button
-          onClick={onReject}
-          style={{
-            padding: '10px 20px',
-            borderRadius: '20px',
-            border: '1px solid #ccc',
-            backgroundColor: '#fff',
-            color: '#666',
-            fontSize: '14px',
-            cursor: 'pointer',
-            fontWeight: '500'
-          }}
-        >
-          Decline
-        </button>
-        <button
-          onClick={handleAccept}
-          disabled={accepting}
-          style={{
-            padding: '10px 24px',
-            borderRadius: '20px',
-            border: 'none',
-            backgroundColor: '#1a5f5a',
-            color: '#fff',
-            fontSize: '14px',
-            cursor: accepting ? 'default' : 'pointer',
-            fontWeight: '600',
-            opacity: accepting ? 0.7 : 1
-          }}
-        >
-          {accepting ? 'Accepting...' : 'Accept'}
-        </button>
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+        <button onClick={onReject} style={{
+          padding: '8px 18px', borderRadius: '20px', border: '1px solid #ccc',
+          backgroundColor: '#fff', color: '#666', fontSize: '13px', cursor: 'pointer',
+        }}>Decline</button>
+        <button onClick={handleAccept} disabled={accepting} style={{
+          padding: '8px 20px', borderRadius: '20px', border: 'none',
+          backgroundColor: theme.colors.primary, color: '#fff', fontSize: '13px',
+          cursor: accepting ? 'default' : 'pointer', fontWeight: '600',
+          opacity: accepting ? 0.7 : 1,
+        }}>{accepting ? 'Accepting...' : 'Accept'}</button>
       </div>
     </div>
   );
 }
 
-function MatchCard({ match, onClick }) {
-  const [isHovered, setIsHovered] = useState(false);
-
+function MatchCard({ match, onBridge }) {
   return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        backgroundColor: '#fff',
-        borderRadius: '16px',
-        padding: '20px',
-        cursor: 'pointer',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        animation: 'fadeIn 0.4s ease',
-        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-        boxShadow: isHovered ? '0 12px 32px rgba(0,0,0,0.15)' : 'none'
-      }}
-    >
+    <div style={{
+      flex: '0 0 300px',
+      scrollSnapAlign: 'center',
+      backgroundColor: theme.colors.surfaceWhite,
+      borderRadius: '20px',
+      overflow: 'hidden',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+      animation: 'fadeIn 0.4s ease',
+    }}>
+      {/* Photo placeholder / gradient header */}
       <div style={{
+        height: '160px',
+        background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryLight} 100%)`,
         display: 'flex',
         alignItems: 'center',
-        gap: '14px',
-        marginBottom: '12px'
+        justifyContent: 'center',
+        position: 'relative',
       }}>
         <div style={{
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          backgroundColor: '#1a5f5a',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: '600',
-          fontSize: '20px'
-        }}>{match.first_name[0]}</div>
-        <div style={{ flex: 1 }}>
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#1a1a1a',
-            margin: 0
-          }}>{match.first_name}, {match.age}</h3>
-          <p style={{
-            fontSize: '13px',
-            color: '#666',
-            margin: '2px 0 0 0'
-          }}>{match.profession} • {match.location}</p>
+          width: '72px', height: '72px', borderRadius: '50%',
+          backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '28px', fontWeight: '600',
+        }}>
+          {match.first_name[0]}
         </div>
-        <span style={{
-          fontSize: '16px',
-          color: '#1a5f5a',
-          fontWeight: '700'
-        }}>{match.compatibility_score}%</span>
+        <div style={{
+          position: 'absolute', top: '12px', right: '12px',
+          backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '12px',
+          padding: '4px 10px', fontSize: '13px', color: '#fff', fontWeight: '600',
+        }}>{match.compatibility_score}%</div>
       </div>
-      <p style={{
-        fontSize: '14px',
-        color: '#666',
-        marginBottom: '14px',
-        lineHeight: '1.5'
-      }}>{match.statement || 'No bio yet'}</p>
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        flexWrap: 'wrap'
-      }}>
-        {match.interests.slice(0, 5).map(interest => (
-          <span key={interest} style={{
-            fontSize: '12px',
-            padding: '6px 12px',
-            backgroundColor: '#f0f7f6',
-            borderRadius: '12px',
-            color: '#1a5f5a',
-            fontWeight: '500'
-          }}>{interest}</span>
-        ))}
+
+      {/* Card content */}
+      <div style={{ padding: '18px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: '600', color: theme.colors.textDark, margin: '0 0 2px' }}>
+          {match.first_name}, {match.age}
+        </h3>
+        <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '0 0 6px' }}>
+          {match.profession} · {match.location}
+        </p>
+        {match.focus && (
+          <span style={{
+            display: 'inline-block', fontSize: '11px', padding: '4px 10px',
+            backgroundColor: `rgba(45, 79, 92, 0.08)`, borderRadius: '10px',
+            color: theme.colors.primary, fontWeight: '500', marginBottom: '10px',
+          }}>{match.focus}</span>
+        )}
+        <p style={{
+          fontSize: '13px', color: theme.colors.textMedium, lineHeight: '1.5',
+          marginBottom: '14px',
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}>
+          {match.headline || match.statement || 'No bio yet'}
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+          {(match.interests || []).slice(0, 4).map(interest => (
+            <span key={interest} style={{
+              fontSize: '11px', padding: '4px 10px',
+              backgroundColor: '#f0f4f5', borderRadius: '10px',
+              color: theme.colors.textMedium, fontWeight: '500',
+            }}>{interest}</span>
+          ))}
+        </div>
+        <button onClick={onBridge} style={{
+          width: '100%', padding: '12px', borderRadius: '25px',
+          border: 'none', backgroundColor: theme.colors.primary,
+          color: '#fff', fontSize: '15px', fontWeight: '600',
+          cursor: 'pointer', letterSpacing: '1px',
+        }}>
+          BRIDGE
+        </button>
       </div>
     </div>
   );
