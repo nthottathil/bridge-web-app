@@ -43,10 +43,10 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 20px;
   height: 20px;
-  background: #1a5f5a;
+  background: #2D4F5C;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(26, 95, 90, 0.3);
+  box-shadow: 0 2px 6px rgba(45, 79, 92, 0.3);
   transition: transform 0.2s;
 }
 
@@ -57,16 +57,16 @@ input[type="range"]::-webkit-slider-thumb:hover {
 input[type="range"]::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: #1a5f5a;
+  background: #2D4F5C;
   border-radius: 50%;
   cursor: pointer;
   border: none;
-  box-shadow: 0 2px 6px rgba(26, 95, 90, 0.3);
+  box-shadow: 0 2px 6px rgba(45, 79, 92, 0.3);
 }
 
 textarea:focus,
 input:focus {
-  border-color: #1a5f5a !important;
+  border-color: #2D4F5C !important;
   outline: none;
 }
 

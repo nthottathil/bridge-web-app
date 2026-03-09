@@ -7,16 +7,16 @@ function SelectionChip({ label, selected, onClick, ranked }) {
       style={{
         padding: '11px 20px',
         borderRadius: '25px',
-        border: `2px solid ${selected ? '#1a5f5a' : '#e0e0e0'}`,
-        backgroundColor: selected ? '#1a5f5a' : '#fff',
-        color: selected ? '#fff' : '#333',
+        border: `1.5px solid ${selected ? '#2D4F5C' : '#ccc'}`,
+        backgroundColor: selected ? '#2D4F5C' : 'transparent',
+        color: selected ? '#fff' : '#1a1a1a',
         fontSize: '14px',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
         fontWeight: selected ? '500' : '400',
-        boxShadow: selected ? '0 2px 8px rgba(26, 95, 90, 0.2)' : 'none'
+        transition: 'all 0.2s ease'
       }}
     >
       {ranked && (

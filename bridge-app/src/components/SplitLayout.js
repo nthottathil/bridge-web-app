@@ -1,93 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import BridgeLogo from './BridgeLogo';
+import { theme } from '../theme';
 
-function SplitLayout({ leftContent, rightContent, leftTitle, progress }) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+const TABS = ['Identity', 'Direction', 'Vibe', 'Commitment'];
 
+function SplitLayout({ rightContent, leftTitle, currentTab, subtitle }) {
   return (
     <div style={{
+      minHeight: '100vh',
+      background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
       display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      minHeight: '100vh'
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+      padding: '20px 16px 80px',
     }}>
-      {/* Left Panel */}
       <div style={{
-        flex: isMobile ? 'none' : '0 0 38%',
-        backgroundColor: '#1a5f5a',
-        color: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        padding: isMobile ? '28px 24px' : '48px 40px',
-        minHeight: isMobile ? 'auto' : '100vh',
-        position: 'relative'
+        width: '100%',
+        maxWidth: '430px',
+        animation: 'fadeIn 0.4s ease',
       }}>
-        <div style={{
-          flex: isMobile ? 'none' : 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: isMobile ? 'flex-start' : 'center'
-        }}>
-          <div style={{ marginBottom: isMobile ? '20px' : '32px' }}>
-            <BridgeLogo />
-          </div>
-          <h1 style={{
-            fontSize: isMobile ? '22px' : '30px',
-            fontWeight: '500',
-            lineHeight: '1.35',
-            fontStyle: 'italic',
-            maxWidth: '300px',
-            letterSpacing: '-0.3px'
-          }}>{leftTitle}</h1>
-          {leftContent}
-        </div>
-        {progress !== undefined && (
-          <div style={{ marginTop: isMobile ? '20px' : 'auto', paddingTop: '16px' }}>
-            <div style={{
-              height: '4px',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              borderRadius: '2px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                height: '100%',
-                backgroundColor: '#fff',
-                width: `${progress}%`,
-                transition: 'width 0.4s ease',
-                borderRadius: '2px'
-              }} />
-            </div>
-            <div style={{
-              fontSize: '12px',
-              opacity: 0.7,
-              marginTop: '8px',
-              textAlign: 'right'
-            }}>{Math.round(progress)}% complete</div>
+        {/* Tab Header */}
+        {currentTab !== undefined && (
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            marginBottom: '24px',
+            flexWrap: 'wrap',
+          }}>
+            {TABS.map((tab, i) => (
+              <span key={tab} style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                fontSize: '14px',
+                fontWeight: i === currentTab ? '600' : '400',
+                backgroundColor: i === currentTab ? theme.colors.surfaceWhite : 'transparent',
+                color: i === currentTab ? theme.colors.textDark : 'rgba(255,255,255,0.7)',
+                transition: 'all 0.3s ease',
+              }}>{tab}</span>
+            ))}
           </div>
         )}
-      </div>
-      
-      {/* Right Panel */}
-      <div style={{
-        flex: 1,
-        backgroundColor: '#fff',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: isMobile ? '28px 24px 40px' : '48px 40px',
-        overflowY: 'auto',
-        minHeight: isMobile ? 'auto' : '100vh'
-      }}>
+
+        {/* Logo */}
+        <div style={{ marginBottom: '8px' }}>
+          <BridgeLogo />
+        </div>
+
+        {/* Title */}
+        {leftTitle && (
+          <h1 style={{
+            fontSize: '26px',
+            fontWeight: '600',
+            color: theme.colors.textDark,
+            marginBottom: subtitle ? '4px' : '20px',
+            lineHeight: '1.3',
+          }}>{leftTitle}</h1>
+        )}
+
+        {subtitle && (
+          <p style={{
+            fontSize: '14px',
+            color: theme.colors.textMedium,
+            marginBottom: '20px',
+            lineHeight: '1.4',
+          }}>{subtitle}</p>
+        )}
+
+        {/* Content Card */}
         <div style={{
-          width: '100%',
-          maxWidth: '440px',
-          animation: 'fadeIn 0.4s ease'
+          backgroundColor: theme.colors.surfaceCard,
+          borderRadius: theme.borderRadius.card,
+          padding: '28px 24px',
+          backdropFilter: 'blur(10px)',
         }}>
           {rightContent}
         </div>

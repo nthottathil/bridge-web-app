@@ -16,13 +16,13 @@ function NavButton({ onClick, direction = 'next', disabled = false, label }) {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
-        backgroundColor: isNext ? '#1a5f5a' : '#f0f0f0',
+        backgroundColor: isNext ? '#2D4F5C' : '#f0f0f0',
         color: isNext ? '#fff' : '#333',
         opacity: disabled ? 0.4 : 1,
         fontSize: '15px',
         fontWeight: '500',
         padding: label ? '0 24px' : '0',
-        boxShadow: isNext && !disabled ? '0 4px 12px rgba(26, 95, 90, 0.25)' : 'none'
+        boxShadow: isNext && !disabled ? '0 4px 12px rgba(45, 79, 92, 0.25)' : 'none'
       }}
     >
       {label || (isNext ? (
