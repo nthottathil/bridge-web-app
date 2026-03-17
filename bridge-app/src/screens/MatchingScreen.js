@@ -620,7 +620,8 @@ function MatchCard({ match, onBridge, onViewProfile }) {
     <div
       onClick={onViewProfile}
       style={{
-        flex: '0 0 280px',
+        flex: '0 0 85%',
+        maxWidth: '360px',
         scrollSnapAlign: 'center',
         backgroundColor: theme.colors.surfaceWhite,
         borderRadius: '20px',
@@ -632,7 +633,7 @@ function MatchCard({ match, onBridge, onViewProfile }) {
     >
       {/* Photo */}
       <div style={{
-        height: '280px',
+        height: '340px',
         backgroundColor: '#e8e8e8',
         overflow: 'hidden',
       }}>

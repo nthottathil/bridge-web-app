@@ -28,7 +28,7 @@ const CATEGORIES = {
 
 const CATEGORY_NAMES = Object.keys(CATEGORIES);
 
-function PerspectiveScreen({ data, update }) {
+function PerspectiveScreen({ data, update, onHideNav }) {
   const [activeCategory, setActiveCategory] = useState('Motivation');
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [currentAnswer, setCurrentAnswer] = useState('');
@@ -43,6 +43,7 @@ function PerspectiveScreen({ data, update }) {
   const handleQuestionSelect = (question) => {
     setSelectedQuestion(question);
     setCurrentAnswer(answers[question] || '');
+    if (onHideNav) onHideNav(true);
   };
 
   // Handle saving the answer
@@ -53,6 +54,7 @@ function PerspectiveScreen({ data, update }) {
     }
     setSelectedQuestion(null);
     setCurrentAnswer('');
+    if (onHideNav) onHideNav(false);
   };
 
   // Handle "Pick another"
@@ -63,6 +65,7 @@ function PerspectiveScreen({ data, update }) {
     }
     setSelectedQuestion(null);
     setCurrentAnswer('');
+    if (onHideNav) onHideNav(false);
   };
 
   // Answer view
