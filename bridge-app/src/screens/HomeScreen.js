@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { theme } from '../theme';
 import BridgeLogo from '../components/BridgeLogo';
-import { groupsAPI, eventsAPI, friendsAPI, collectionsAPI } from '../services/api';
+import { eventsAPI, friendsAPI, collectionsAPI } from '../services/api';
 
 function HomeScreen({ userData, groupData, onProfile, onChat, onCalendar, onGroupInfo }) {
   const [events, setEvents] = useState([]);

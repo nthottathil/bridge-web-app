@@ -14,16 +14,20 @@ import DealBreakersScreen from './screens/DealBreakersScreen';
 import MatchingScreen from './screens/MatchingScreen';
 import HomeScreen from './screens/HomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import ChatScreen from './screens/ChatScreen';
+import GroupInfoScreen from './screens/GroupInfoScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import CollectionsScreen from './screens/CollectionsScreen';
+import CalendarScreen from './screens/CalendarScreen';
 import { FloatingNav, NavButton, BottomNav } from './components';
 import { authAPI, groupsAPI } from './services/api';
 
 /*
   Onboarding flow (9 steps across 4 tabs):
-  ─────────────────────────────────────────
-  Tab 0 – Identity:    0 Introducing  │ 1 Location  │ 2 Focus  │ 3 Headline
-  Tab 1 – Direction:   4 Goals        │ 5 Perspective
-  Tab 2 – Vibe:        6 Interests
-  Tab 3 – Commitment:  7 Commitment   │ 8 DealBreakers
+  Tab 0 - Identity:    0 Introducing | 1 Location | 2 Focus | 3 Headline
+  Tab 1 - Direction:   4 Goals       | 5 Perspective
+  Tab 2 - Vibe:        6 Interests
+  Tab 3 - Commitment:  7 Commitment  | 8 DealBreakers
 */
 
 const TOTAL_STEPS = 9;
@@ -33,7 +37,8 @@ function AppContent() {
   const [showLogin, setShowLogin] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [postView, setPostView] = useState('matching'); // 'matching' | 'home' | 'chat'
+  // postView: 'matching' | 'home' | 'chat' | 'groupInfo' | 'settings' | 'collections' | 'calendar'
+  const [postView, setPostView] = useState('matching');
   const [hideFloatingNav, setHideFloatingNav] = useState(false);
   const [groupData, setGroupData] = useState(null);
   const [userData, setUserData] = useState({
@@ -45,26 +50,18 @@ function AppContent() {
     gender: '',
     ageCollabOnly: false,
     genderCollabOnly: false,
-
     location: '',
     country: '',
     maxDistance: 5,
-
     focus: '',
     headline: '',
     statement: '',
     profilePhoto: '',
-
     primaryGoal: '',
-
     perspectiveAnswers: {},
-
     interests: [],
-
     commitmentLevel: '',
     dealBreakers: [],
-
-    // Legacy fields kept for backend compatibility
     personality: {
       extroversion: 50,
       openness: 50,
@@ -118,7 +115,7 @@ function AppContent() {
       country: profile.country || prev.country,
       profilePhoto: profile.profile_photo_url || prev.profilePhoto,
     }));
-    setCurrentStep(TOTAL_STEPS); // Go to matching
+    setCurrentStep(TOTAL_STEPS);
   };
 
   const handleLogout = () => {
@@ -126,6 +123,20 @@ function AppContent() {
     setIsAuthenticated(false);
     setShowLogin(true);
     setCurrentStep(0);
+    setGroupData(null);
+    setPostView('matching');
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!groupData) return;
+    if (!window.confirm('Are you sure you want to leave this group?')) return;
+    try {
+      await groupsAPI.leaveGroup(groupData.group_id);
+      setGroupData(null);
+      setPostView('matching');
+    } catch (err) {
+      console.error('Error leaving group:', err);
+    }
   };
 
   const updateUserData = (field, value) => {
@@ -163,7 +174,6 @@ function AppContent() {
         country: userData.country || '',
         profile_photo_url: userData.profilePhoto || '',
       });
-      console.log('Onboarding data saved successfully');
     } catch (err) {
       console.error('Failed to save onboarding data:', err);
     }
@@ -178,10 +188,16 @@ function AppContent() {
     }
   }, [currentStep, isAuthenticated]);
 
+  const refreshGroupData = async () => {
+    try {
+      const data = await groupsAPI.getMyGroup();
+      if (data) setGroupData(data);
+    } catch (err) { /* ignore */ }
+  };
+
   const nextStep = () => setCurrentStep(prev => prev + 1);
   const prevStep = () => setCurrentStep(prev => Math.max(0, prev - 1));
 
-  // Validation per step
   const canProceed = () => {
     switch (currentStep) {
       case 0: return userData.firstName && userData.surname && userData.profession && userData.age >= 18;
@@ -197,24 +213,23 @@ function AppContent() {
     }
   };
 
+  // Bottom nav handler
+  const handleTabChange = (tab) => {
+    if (tab === 'home') setPostView('home');
+    else if (tab === 'chat') setPostView('chat');
+    else if (tab === 'collections') setPostView('collections');
+  };
+
   // Auth screens
   if (!isAuthenticated) {
     if (showLogin) {
-      return (
-        <LoginScreen
-          onLoginSuccess={handleLoginSuccess}
-          onSwitchToSignup={() => setShowLogin(false)}
-        />
-      );
+      return <LoginScreen onLoginSuccess={handleLoginSuccess} onSwitchToSignup={() => setShowLogin(false)} />;
     }
     return (
       <SignupScreen
         data={userData}
         update={updateUserData}
-        onNext={() => {
-          setIsAuthenticated(true);
-          setCurrentStep(0);
-        }}
+        onNext={() => { setIsAuthenticated(true); setCurrentStep(0); }}
         onSwitchToLogin={() => setShowLogin(true)}
       />
     );
@@ -224,16 +239,72 @@ function AppContent() {
   if (showProfile) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <ProfileScreen
-          onBack={() => setShowProfile(false)}
-          onLogout={handleLogout}
-        />
+        <ProfileScreen onBack={() => setShowProfile(false)} onLogout={handleLogout} />
       </div>
     );
   }
 
   // Post-onboarding views
   if (currentStep >= TOTAL_STEPS) {
+    // Calendar view
+    if (postView === 'calendar' && groupData) {
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          <CalendarScreen groupData={groupData} onBack={() => setPostView('home')} />
+        </div>
+      );
+    }
+
+    // Settings view
+    if (postView === 'settings' && groupData) {
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          <SettingsScreen groupData={groupData} onBack={() => setPostView('groupInfo')} onLeaveGroup={handleLeaveGroup} />
+        </div>
+      );
+    }
+
+    // Group info view
+    if (postView === 'groupInfo' && groupData) {
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          <GroupInfoScreen
+            groupData={groupData}
+            userData={userData}
+            onBack={() => setPostView('chat')}
+            onChat={() => setPostView('chat')}
+            onSettings={() => setPostView('settings')}
+            onCollections={() => setPostView('collections')}
+          />
+        </div>
+      );
+    }
+
+    // Collections view
+    if (postView === 'collections' && groupData) {
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          <CollectionsScreen groupData={groupData} onBack={() => setPostView('home')} />
+          <BottomNav activeTab="collections" onTabChange={handleTabChange} />
+        </div>
+      );
+    }
+
+    // Chat view (when in group)
+    if (postView === 'chat' && groupData) {
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          <ChatScreen
+            groupData={groupData}
+            userData={userData}
+            onProfile={() => setShowProfile(true)}
+            onBack={() => setPostView('home')}
+            onGroupInfo={() => setPostView('groupInfo')}
+          />
+        </div>
+      );
+    }
+
     // Home view (shown when user has a group)
     if (postView === 'home' && groupData) {
       return (
@@ -243,13 +314,15 @@ function AppContent() {
             groupData={groupData}
             onProfile={() => setShowProfile(true)}
             onChat={() => setPostView('chat')}
+            onCalendar={() => setPostView('calendar')}
+            onGroupInfo={() => setPostView('groupInfo')}
           />
-          <BottomNav activeTab="home" onTabChange={(tab) => setPostView(tab === 'chat' ? 'chat' : 'home')} />
+          <BottomNav activeTab="home" onTabChange={handleTabChange} />
         </div>
       );
     }
 
-    // Chat view (MatchingScreen handles both matching and chat internally)
+    // Matching view (no group yet) - MatchingScreen handles matching + group creation internally
     return (
       <div style={{ minHeight: '100vh' }}>
         <MatchingScreen
@@ -257,10 +330,8 @@ function AppContent() {
           onBack={() => setCurrentStep(TOTAL_STEPS - 1)}
           onLogout={handleLogout}
           onProfile={() => setShowProfile(true)}
+          onGroupFormed={() => refreshGroupData().then(() => setPostView('home'))}
         />
-        {groupData && (
-          <BottomNav activeTab="chat" onTabChange={(tab) => setPostView(tab === 'home' ? 'home' : 'chat')} />
-        )}
       </div>
     );
   }
@@ -294,7 +365,7 @@ function AppContent() {
           <NavButton
             onClick={handleNext}
             disabled={!canProceed()}
-            label={isLastStep ? 'Find my group →' : undefined}
+            label={isLastStep ? 'Find my group \u2192' : undefined}
           />
         </FloatingNav>
       )}

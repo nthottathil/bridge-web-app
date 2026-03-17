@@ -239,6 +239,8 @@ def get_messages(
             "group_id": msg.group_id,
             "user_id": msg.user_id,
             "message_text": msg.message_text,
+            "message_type": getattr(msg, 'message_type', 'text') or 'text',
+            "metadata_json": getattr(msg, 'metadata_json', None),
             "created_at": msg.created_at,
             "user_first_name": user.first_name if user else "Unknown"
         })
