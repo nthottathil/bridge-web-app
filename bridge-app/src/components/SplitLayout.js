@@ -1,5 +1,4 @@
 import React from 'react';
-import BridgeLogo from './BridgeLogo';
 import { theme } from '../theme';
 
 const TABS = ['Identity', 'Direction', 'Vibe', 'Commitment'];

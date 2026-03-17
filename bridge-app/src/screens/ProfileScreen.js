@@ -347,33 +347,7 @@ function ProfileScreen({ onBack, onLogout }) {
       minHeight: '100vh',
       background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
     }}>
-      <div style={{ maxWidth: '430px', margin: '0 auto' }}>
-        {/* Top bar */}
-        <div style={{
-          padding: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button onClick={onBack} style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
-              color: theme.colors.textDark, display: 'flex', alignItems: 'center',
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-              </svg>
-            </button>
-            <BridgeLogo />
-          </div>
-          <button onClick={onLogout} style={{
-            padding: '6px 14px', borderRadius: '14px',
-            border: `1.5px solid ${theme.colors.borderLight}`,
-            backgroundColor: 'transparent', color: theme.colors.textMedium,
-            cursor: 'pointer', fontSize: '12px', fontWeight: '500',
-          }}>Log Out</button>
-        </div>
-
+      <div style={{ maxWidth: '430px', margin: '0 auto', paddingTop: '16px' }}>
         {/* Profile hero card */}
         <div style={{
           backgroundColor: theme.colors.surfaceCard,
@@ -383,20 +357,25 @@ function ProfileScreen({ onBack, onLogout }) {
           backdropFilter: 'blur(10px)',
           position: 'relative',
         }}>
-          {/* Edit pencil button */}
-          <button onClick={() => setEditing(true)} style={{
-            position: 'absolute', top: '16px', right: '16px',
-            width: '36px', height: '36px', borderRadius: '50%',
-            backgroundColor: 'rgba(255,255,255,0.7)', border: '1px solid #e0e0e0',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          {/* Top row: logo + arrow */}
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            marginBottom: '16px',
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
-              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-            </svg>
-          </button>
+            <BridgeLogo />
+            <button onClick={onBack} style={{
+              width: '36px', height: '36px', borderRadius: '50%',
+              background: 'none', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+              </svg>
+            </button>
+          </div>
 
           {/* Profile photo */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', position: 'relative' }}>
             <div
               onClick={() => fileInputRef.current?.click()}
               style={{
@@ -411,17 +390,28 @@ function ProfileScreen({ onBack, onLogout }) {
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ textAlign: 'center' }}>
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill={theme.colors.textLight}>
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill={theme.colors.textLight}>
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                   </svg>
-                  <p style={{ fontSize: '11px', color: theme.colors.textLight, margin: '4px 0 0' }}>
-                    Tap to add
+                  <p style={{ fontSize: '11px', color: theme.colors.textLight, margin: '4px 0 0', lineHeight: '1.3' }}>
+                    Add your profile<br/>picture
                   </p>
                 </div>
               )}
             </div>
             <input ref={fileInputRef} type="file" accept="image/*"
               onChange={handlePhotoSelect} style={{ display: 'none' }} />
+            {/* Edit pencil */}
+            <button onClick={() => setEditing(true)} style={{
+              position: 'absolute', bottom: '0', right: '20%',
+              width: '32px', height: '32px', borderRadius: '50%',
+              backgroundColor: 'transparent', border: 'none',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+            </button>
           </div>
 
           {/* Name */}
@@ -477,7 +467,7 @@ function ProfileScreen({ onBack, onLogout }) {
           }}>{message}</div>
         )}
 
-        {/* Goal card */}
+        {/* Goal + Perspective combined card */}
         <div style={{
           backgroundColor: theme.colors.surfaceCard,
           borderRadius: '20px',
@@ -485,6 +475,7 @@ function ProfileScreen({ onBack, onLogout }) {
           padding: '20px',
           backdropFilter: 'blur(10px)',
         }}>
+          {/* Goal section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill={theme.colors.primary}>
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -502,30 +493,17 @@ function ProfileScreen({ onBack, onLogout }) {
               }}>
                 {profile.primary_goal}
               </p>
-              {profile.headline && (
-                <p style={{
-                  fontSize: '13px', color: theme.colors.textMedium,
-                  margin: 0, lineHeight: '1.4',
-                }}>
-                  {profile.headline}
-                </p>
-              )}
             </div>
           ) : (
             <p style={{ fontSize: '14px', color: theme.colors.textLight, margin: 0 }}>
               No goal set yet
             </p>
           )}
-        </div>
 
-        {/* Perspective questions card */}
-        <div style={{
-          backgroundColor: theme.colors.surfaceCard,
-          borderRadius: '20px',
-          margin: '0 16px 14px',
-          padding: '20px',
-          backdropFilter: 'blur(10px)',
-        }}>
+          {/* Divider */}
+          <div style={{ borderTop: '1px solid #e8e8e8', margin: '18px 0' }} />
+
+          {/* Perspective section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill={theme.colors.primary}>
               <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
@@ -561,8 +539,8 @@ function ProfileScreen({ onBack, onLogout }) {
           )}
         </div>
 
-        {/* Interests */}
-        {profile.interests && profile.interests.length > 0 && (
+        {/* Interests + Deal breakers */}
+        {((profile.interests && profile.interests.length > 0) || (profile.deal_breakers && profile.deal_breakers.length > 0)) && (
           <div style={{
             backgroundColor: theme.colors.surfaceCard,
             borderRadius: '20px',
@@ -570,33 +548,36 @@ function ProfileScreen({ onBack, onLogout }) {
             padding: '20px',
             backdropFilter: 'blur(10px)',
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: theme.colors.textDark, margin: '0 0 12px' }}>
-              Interests
-            </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {profile.interests.map(interest => (
+            <div style={{
+              borderTop: '1px solid #e8e8e8',
+              paddingTop: '16px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+            }}>
+              {(profile.interests || []).map(interest => (
                 <span key={interest} style={{
                   padding: '6px 14px', borderRadius: '20px',
-                  backgroundColor: 'rgba(45, 79, 92, 0.08)',
-                  color: theme.colors.primary, fontSize: '13px', fontWeight: '500',
+                  border: '1px solid #ccc',
+                  color: theme.colors.textDark, fontSize: '13px', fontWeight: '500',
                 }}>
                   {interest}
+                </span>
+              ))}
+              {(profile.deal_breakers || []).map(db => (
+                <span key={db} style={{
+                  padding: '6px 14px', borderRadius: '20px',
+                  border: '1px solid #ccc',
+                  color: theme.colors.textDark, fontSize: '13px', fontWeight: '500',
+                }}>
+                  {db}
                 </span>
               ))}
             </div>
           </div>
         )}
 
-        {/* Edit button at bottom */}
-        <div style={{ padding: '0 16px 40px' }}>
-          <button onClick={() => setEditing(true)} style={{
-            width: '100%', padding: '14px', fontSize: '15px', fontWeight: '600',
-            backgroundColor: theme.colors.primary, color: '#fff',
-            border: 'none', borderRadius: '25px', cursor: 'pointer',
-          }}>
-            Edit Profile
-          </button>
-        </div>
+        <div style={{ height: '40px' }} />
       </div>
     </div>
   );
