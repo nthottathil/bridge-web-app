@@ -34,6 +34,7 @@ function AppContent() {
   const [showProfile, setShowProfile] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [postView, setPostView] = useState('matching'); // 'matching' | 'home' | 'chat'
+  const [hideFloatingNav, setHideFloatingNav] = useState(false);
   const [groupData, setGroupData] = useState(null);
   const [userData, setUserData] = useState({
     firstName: '',
@@ -276,7 +277,7 @@ function AppContent() {
     <FocusScreen key="focus" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <HeadlineScreen key="headline" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <GoalsPrimaryScreen key="goals" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
-    <PerspectiveScreen key="perspective" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
+    <PerspectiveScreen key="perspective" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} onHideNav={setHideFloatingNav} />,
     <InterestsScreen key="interests" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <CommitmentScreen key="commitment" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <DealBreakersScreen key="dealbreakers" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
@@ -285,16 +286,18 @@ function AppContent() {
   return (
     <div style={{ minHeight: '100vh' }}>
       {onboardingScreens[currentStep]}
-      <FloatingNav>
-        {currentStep > 0 && (
-          <NavButton onClick={prevStep} direction="back" />
-        )}
-        <NavButton
-          onClick={handleNext}
-          disabled={!canProceed()}
-          label={isLastStep ? 'Find my group →' : undefined}
-        />
-      </FloatingNav>
+      {!hideFloatingNav && (
+        <FloatingNav>
+          {currentStep > 0 && (
+            <NavButton onClick={prevStep} direction="back" />
+          )}
+          <NavButton
+            onClick={handleNext}
+            disabled={!canProceed()}
+            label={isLastStep ? 'Find my group →' : undefined}
+          />
+        </FloatingNav>
+      )}
     </div>
   );
 }
