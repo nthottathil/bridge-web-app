@@ -467,32 +467,21 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           marginBottom: '20px',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <BridgeLogo />
-            {/* User's small avatar */}
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
-              backgroundColor: theme.colors.primary, overflow: 'hidden',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '2px solid #fff',
-            }}>
-              {data.profilePhoto ? (
-                <img src={data.profilePhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ color: '#fff', fontSize: '13px', fontWeight: '600' }}>
-                  {(data.firstName || 'U')[0]}
-                </span>
-              )}
-            </div>
-          </div>
+          <BridgeLogo />
           <button onClick={onProfile} style={{
-            width: '36px', height: '36px', borderRadius: '50%',
-            background: 'none', border: 'none', cursor: 'pointer',
+            width: '42px', height: '42px', borderRadius: '50%',
+            backgroundColor: theme.colors.primary, overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '2px solid #fff',
+            padding: 0, cursor: 'pointer',
           }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
-              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
-            </svg>
+            {data.profilePhoto ? (
+              <img src={data.profilePhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <span style={{ color: '#fff', fontSize: '16px', fontWeight: '600' }}>
+                {(data.firstName || 'U')[0]}
+              </span>
+            )}
           </button>
         </div>
 
