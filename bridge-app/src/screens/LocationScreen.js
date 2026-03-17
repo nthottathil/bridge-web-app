@@ -148,8 +148,8 @@ function LocationScreen({ data, update }) {
   return (
     <SplitLayout
       currentTab={0}
-      leftTitle="Your location"
-      subtitle="Where should we find your people?"
+      greeting={data.firstName ? `Hi, ${data.firstName}` : undefined}
+      leftTitle="Where are you based?"
       rightContent={
         <div ref={wrapperRef} style={{ position: 'relative' }}>
           <label style={{
