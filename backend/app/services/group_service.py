@@ -53,11 +53,15 @@ def get_group_members(db: Session, group_id: int) -> List[Dict[str, Any]]:
             members.append({
                 "user_id": user.id,
                 "first_name": user.first_name,
+                "surname": user.surname,
                 "age": user.age,
                 "profession": user.profession,
                 "interests": user.interests,
                 "primary_goal": user.primary_goal,
                 "statement": user.statement,
+                "location": user.location,
+                "focus": getattr(user, 'focus', ''),
+                "profile_photo_url": getattr(user, 'profile_photo_url', ''),
                 "joined_at": membership.joined_at
             })
 
@@ -135,6 +139,7 @@ def get_group_info(db: Session, group_id: int) -> Optional[Dict[str, Any]]:
 
     return {
         "group_id": group.id,
+        "name": getattr(group, 'name', None),
         "created_at": group.created_at,
         "member_count": len(members),
         "members": members,

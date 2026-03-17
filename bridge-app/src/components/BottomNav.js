@@ -7,8 +7,9 @@ function BottomNav({ activeTab, onTabChange }) {
       id: 'home',
       label: 'Home',
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
       ),
     },
@@ -16,8 +17,17 @@ function BottomNav({ activeTab, onTabChange }) {
       id: 'chat',
       label: 'Chat',
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'collections',
+      label: 'Collections',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
         </svg>
       ),
     },
@@ -30,7 +40,7 @@ function BottomNav({ activeTab, onTabChange }) {
       left: 0,
       right: 0,
       backgroundColor: theme.colors.surfaceWhite,
-      borderTop: '1px solid #e8e8e8',
+      borderTop: `1px solid ${theme.colors.borderLight}`,
       display: 'flex',
       justifyContent: 'center',
       zIndex: 100,
@@ -40,29 +50,33 @@ function BottomNav({ activeTab, onTabChange }) {
         maxWidth: '430px',
         width: '100%',
       }}>
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '10px 0',
-              border: 'none',
-              backgroundColor: 'transparent',
-              color: activeTab === tab.id ? theme.colors.primary : '#aaa',
-              cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: activeTab === tab.id ? '600' : '400',
-            }}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '10px 0 8px',
+                border: 'none',
+                backgroundColor: 'transparent',
+                color: isActive ? theme.colors.primary : '#aaa',
+                cursor: 'pointer',
+                fontSize: '11px',
+                fontWeight: isActive ? '600' : '400',
+                transition: 'color 0.15s ease',
+              }}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
