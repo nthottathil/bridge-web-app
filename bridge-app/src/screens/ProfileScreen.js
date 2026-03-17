@@ -33,7 +33,7 @@ function ProfileScreen({ onBack, onLogout }) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement('canvas');
         const size = 300;
         canvas.width = size;
@@ -45,6 +45,13 @@ function ProfileScreen({ onBack, onLogout }) {
         ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         updateField('profile_photo_url', dataUrl);
+        try {
+          await authAPI.updateProfile({ profile_photo_url: dataUrl });
+          setMessage('Photo saved!');
+          setTimeout(() => setMessage(''), 3000);
+        } catch (err) {
+          setError('Failed to save photo');
+        }
       };
       img.src = event.target.result;
     };
