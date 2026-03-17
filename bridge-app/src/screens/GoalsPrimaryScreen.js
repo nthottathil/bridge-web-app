@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SplitLayout, SelectionChip } from '../components';
+import { theme } from '../theme';
 
 const DEFAULT_GOALS = [
   'Land my first role in Tech',
@@ -30,6 +31,16 @@ function GoalsPrimaryScreen({ data, update, onNext, onBack }) {
     <SplitLayout
       currentTab={1}
       leftTitle="Goals"
+      titleExtra={
+        <span style={{
+          padding: '6px 16px',
+          borderRadius: '20px',
+          backgroundColor: theme.colors.textDark,
+          color: '#fff',
+          fontSize: '13px',
+          fontWeight: '600',
+        }}>Primary</span>
+      }
       subtitle="Select the ONE goal that matters most to you. This will be the foundation of your matches."
       rightContent={
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
