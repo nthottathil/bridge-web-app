@@ -4,7 +4,7 @@ import { theme } from '../theme';
 
 const TABS = ['Identity', 'Direction', 'Vibe', 'Commitment'];
 
-function SplitLayout({ rightContent, leftTitle, currentTab, subtitle }) {
+function SplitLayout({ rightContent, leftTitle, currentTab, subtitle, greeting, titleExtra }) {
   return (
     <div style={{
       minHeight: '100vh',
@@ -41,20 +41,33 @@ function SplitLayout({ rightContent, leftTitle, currentTab, subtitle }) {
           </div>
         )}
 
-        {/* Logo */}
-        <div style={{ marginBottom: '8px' }}>
-          <BridgeLogo />
-        </div>
+        {/* Greeting */}
+        {greeting && (
+          <p style={{
+            fontSize: '15px',
+            color: theme.colors.textDark,
+            marginBottom: '2px',
+            fontWeight: '400',
+          }}>{greeting}</p>
+        )}
 
         {/* Title */}
         {leftTitle && (
-          <h1 style={{
-            fontSize: '26px',
-            fontWeight: '600',
-            color: theme.colors.textDark,
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
             marginBottom: subtitle ? '4px' : '20px',
-            lineHeight: '1.3',
-          }}>{leftTitle}</h1>
+          }}>
+            <h1 style={{
+              fontSize: '26px',
+              fontWeight: '600',
+              color: theme.colors.textDark,
+              lineHeight: '1.3',
+              margin: 0,
+            }}>{leftTitle}</h1>
+            {titleExtra}
+          </div>
         )}
 
         {subtitle && (

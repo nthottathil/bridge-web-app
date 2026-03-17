@@ -46,15 +46,11 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
         maxWidth: '430px',
         animation: 'fadeIn 0.4s ease',
       }}>
-        <div style={{ marginBottom: '32px' }}><BridgeLogo /></div>
+        <div style={{ marginBottom: '24px' }}><BridgeLogo /></div>
         <h1 style={{
-          fontSize: '28px', fontWeight: '600',
-          color: theme.colors.textDark, marginBottom: '8px',
-        }}>Welcome back</h1>
-        <p style={{
-          fontSize: '15px', color: theme.colors.textMedium,
-          marginBottom: '28px',
-        }}>Log in to your account</p>
+          fontSize: '26px', fontWeight: '600',
+          color: theme.colors.textDark, marginBottom: '24px',
+        }}>Let's create your account</h1>
 
         <div style={{
           backgroundColor: theme.colors.surfaceCard,
@@ -63,16 +59,16 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
           backdropFilter: 'blur(10px)',
         }}>
           <TextInput
-            label="Email"
+            label="Email address"
             type="email"
-            placeholder="your.email@example.com"
+            placeholder=""
             value={email}
             onChange={v => setEmail(v)}
           />
           <TextInput
             label="Password"
             type="password"
-            placeholder="Enter your password"
+            placeholder=""
             value={password}
             onChange={v => setPassword(v)}
           />
@@ -81,42 +77,50 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
             <div style={{
               padding: '12px', backgroundColor: theme.colors.errorBg,
               borderRadius: '8px', color: theme.colors.error,
-              fontSize: '14px', marginBottom: '16px',
+              fontSize: '14px', marginTop: '12px',
             }}>{error}</div>
           )}
+        </div>
 
+        {/* Bottom buttons */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: '32px',
+          padding: '0 4px',
+        }}>
+          <button
+            onClick={onSwitchToSignup}
+            style={{
+              padding: '10px 20px',
+              borderRadius: '25px',
+              border: `1.5px solid ${theme.colors.textDark}`,
+              backgroundColor: 'transparent',
+              color: theme.colors.textDark,
+              fontSize: '14px',
+              cursor: 'pointer',
+              fontWeight: '500',
+            }}
+          >
+            Sign up
+          </button>
           <button
             onClick={handleLogin}
             disabled={!canProceed}
             style={{
-              width: '100%', padding: '14px',
-              borderRadius: '25px', border: 'none',
+              padding: '10px 24px',
+              borderRadius: '25px',
+              border: 'none',
               backgroundColor: canProceed ? theme.colors.primary : '#ccc',
-              color: '#fff', fontSize: '15px', fontWeight: '600',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: '600',
               cursor: canProceed ? 'pointer' : 'not-allowed',
-              marginTop: '8px',
             }}
           >
             {loading ? 'Logging in...' : 'Log in'}
           </button>
-
-          <p style={{
-            textAlign: 'center', fontSize: '14px',
-            color: theme.colors.textMedium, marginTop: '20px',
-          }}>
-            Don't have an account?{' '}
-            <button
-              onClick={onSwitchToSignup}
-              style={{
-                background: 'none', border: 'none',
-                color: theme.colors.primary, cursor: 'pointer',
-                fontWeight: '600', fontSize: '14px',
-                textDecoration: 'underline',
-              }}
-            >
-              Sign up
-            </button>
-          </p>
         </div>
       </div>
     </div>
