@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { theme } from '../theme';
 import BridgeLogo from '../components/BridgeLogo';
-import { eventsAPI, friendsAPI, collectionsAPI } from '../services/api';
+import { eventsAPI, friendsAPI, collectionsAPI, groupSettingsAPI } from '../services/api';
 
-function HomeScreen({ userData, groupData, onProfile, onChat, onCalendar, onGroupInfo }) {
+function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCalendar, onGroupInfo }) {
   const [events, setEvents] = useState([]);
   const [friends, setFriends] = useState([]);
   const [activeGoal, setActiveGoal] = useState(null);
+  const [editingGroupName, setEditingGroupName] = useState(false);
+  const [groupNameDraft, setGroupNameDraft] = useState('');
+  const groupNameInputRef = useRef(null);
 
   const today = new Date();
   const currentMonth = today.toLocaleString('default', { month: 'long' });
@@ -52,6 +55,28 @@ function HomeScreen({ userData, groupData, onProfile, onChat, onCalendar, onGrou
   };
 
   const members = groupData?.members || [];
+
+  const startEditGroupName = (e) => {
+    e.stopPropagation();
+    setGroupNameDraft(groupData.group_name || '');
+    setEditingGroupName(true);
+    setTimeout(() => groupNameInputRef.current?.focus(), 50);
+  };
+
+  const saveGroupName = async () => {
+    const trimmed = groupNameDraft.trim();
+    if (!trimmed || trimmed === (groupData.group_name || '')) {
+      setEditingGroupName(false);
+      return;
+    }
+    try {
+      await groupSettingsAPI.updateGroupName(groupData.group_id, trimmed);
+      setGroupData(prev => ({ ...prev, group_name: trimmed }));
+    } catch (err) {
+      console.error('Error updating group name:', err);
+    }
+    setEditingGroupName(false);
+  };
 
   const formatEventTime = (event) => {
     if (!event.event_date) return '';
@@ -187,16 +212,42 @@ function HomeScreen({ userData, groupData, onProfile, onChat, onCalendar, onGrou
               alignItems: 'center',
               justifyContent: 'space-between',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.primary}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.primary} style={{ flexShrink: 0 }}>
                   <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
                 </svg>
-                <span style={{
-                  fontSize: '15px', fontWeight: '600',
-                  color: theme.colors.textDark,
-                }}>
-                  {groupData.group_name || 'My Group'}
-                </span>
+                {editingGroupName ? (
+                  <input
+                    ref={groupNameInputRef}
+                    value={groupNameDraft}
+                    onChange={e => setGroupNameDraft(e.target.value)}
+                    onBlur={saveGroupName}
+                    onKeyDown={e => { if (e.key === 'Enter') saveGroupName(); if (e.key === 'Escape') setEditingGroupName(false); }}
+                    onClick={e => e.stopPropagation()}
+                    style={{
+                      fontSize: '15px', fontWeight: '600',
+                      color: theme.colors.textDark,
+                      border: `1px solid ${theme.colors.primary}`,
+                      borderRadius: '8px', padding: '4px 8px',
+                      outline: 'none', flex: 1, minWidth: 0,
+                    }}
+                  />
+                ) : (
+                  <span
+                    onClick={startEditGroupName}
+                    style={{
+                      fontSize: '15px', fontWeight: '600',
+                      color: theme.colors.textDark, cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                    }}
+                  >
+                    {groupData.group_name || 'My Group'}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.colors.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </span>
+                )}
               </div>
               <span style={{
                 fontSize: '12px', color: theme.colors.textLight,
