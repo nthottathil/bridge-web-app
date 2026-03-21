@@ -518,81 +518,87 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
 
       {/* ─── Input Area ─── */}
       <div style={{
-        backgroundColor: '#fff',
-        borderTop: '1px solid #e8e8e8',
-        padding: '10px 12px',
-        paddingBottom: 'max(10px, env(safe-area-inset-bottom))',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
+        padding: '8px 12px',
+        paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
         flexShrink: 0,
         position: 'relative',
+        backgroundColor: '#EDF1F5',
       }}>
-        {/* Plus button */}
-        <button
-          onClick={() => setShowPlusMenu(prev => !prev)}
-          style={{
-            width: '34px', height: '34px', borderRadius: '50%',
-            border: '1.5px solid #bbb', backgroundColor: 'transparent',
-            color: '#888', fontSize: '22px', lineHeight: '1',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0, padding: 0,
-          }}
-        >
-          +
-        </button>
-
-        {/* Gallery / image icon */}
-        <button style={{
-          background: 'none', border: 'none', padding: '2px', cursor: 'pointer',
-          color: '#888', flexShrink: 0, display: 'flex', alignItems: 'center',
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '30px',
+          padding: '8px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-        </button>
+          {/* Plus button */}
+          <button
+            onClick={() => setShowPlusMenu(prev => !prev)}
+            style={{
+              width: '32px', height: '32px', borderRadius: '50%',
+              border: 'none', backgroundColor: 'transparent',
+              color: '#555', fontSize: '28px', lineHeight: '1',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, padding: 0, fontWeight: '300',
+            }}
+          >
+            +
+          </button>
 
-        {/* Text input */}
-        <input
-          type="text"
-          value={newMessage}
-          onChange={e => setNewMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Group chat"
-          style={{
-            flex: 1,
-            padding: '10px 18px',
-            fontSize: '15px',
-            border: '1px solid #ddd',
-            borderRadius: '25px',
-            outline: 'none',
-            backgroundColor: '#f5f5f5',
-            color: theme.colors.textDark,
-            WebkitAppearance: 'none',
-          }}
-        />
+          {/* Gallery / image icon */}
+          <button style={{
+            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+            color: '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
+          }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </button>
 
-        {/* Microphone icon */}
-        <button style={{
-          background: 'none', border: 'none', padding: '2px', cursor: 'pointer',
-          color: '#888', flexShrink: 0, display: 'flex', alignItems: 'center',
-        }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="1" width="6" height="12" rx="3"/>
-            <path d="M5 10a7 7 0 0014 0"/>
-            <line x1="12" y1="17" x2="12" y2="21"/>
-            <line x1="8" y1="21" x2="16" y2="21"/>
-          </svg>
-        </button>
+          {/* Text input */}
+          <input
+            type="text"
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Group chat"
+            style={{
+              flex: 1,
+              padding: '10px 16px',
+              fontSize: '16px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '22px',
+              outline: 'none',
+              backgroundColor: '#f4f4f4',
+              color: theme.colors.textDark,
+              WebkitAppearance: 'none',
+            }}
+          />
+
+          {/* Microphone icon */}
+          <button style={{
+            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+            color: '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
+          }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="1" width="6" height="12" rx="3"/>
+              <path d="M5 10a7 7 0 0014 0"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+            </svg>
+          </button>
+        </div>
 
         {/* Plus menu overlay */}
         {showPlusMenu && (
           <>
             <div onClick={() => setShowPlusMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 49 }} />
             <div style={{
-              position: 'absolute', bottom: '58px', left: '12px',
+              position: 'absolute', bottom: '64px', left: '14px',
               backgroundColor: '#fff', borderRadius: '14px',
               boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
               padding: '6px 0', zIndex: 50, minWidth: '200px',
