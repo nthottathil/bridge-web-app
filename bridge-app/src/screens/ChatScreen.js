@@ -131,31 +131,92 @@ function AskCard({ msg }) {
   );
 }
 
-function PollCard({ msg, currentUserId }) {
+function PollCard({ msg, currentUserId, onRefresh }) {
   const isCreator = msg.user_id === currentUserId;
-  const options = msg.poll_options || [];
+  const [options, setOptions] = useState(msg.poll_options || []);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [ended, setEnded] = useState(false);
+  const [voting, setVoting] = useState(false);
+
+  const totalVotes = options.reduce((sum, o) => sum + (o.vote_count || 0), 0);
+
   const handleVote = async (optionId) => {
-    if (!msg.collection_id) return;
-    try { await collectionsAPI.votePoll(msg.collection_id, optionId); } catch (err) { console.error('Error voting:', err); }
+    if (!msg.collection_id || hasVoted || voting) return;
+    setVoting(true);
+    try {
+      await collectionsAPI.votePoll(msg.collection_id, optionId);
+      setOptions(prev => prev.map(o =>
+        o.id === optionId ? { ...o, vote_count: (o.vote_count || 0) + 1 } : o
+      ));
+      setHasVoted(true);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      const detail = err.response?.data?.detail || '';
+      if (detail.includes('already voted')) setHasVoted(true);
+      else console.error('Error voting:', err);
+    } finally { setVoting(false); }
   };
+
   const handleEnd = async () => {
     if (!msg.collection_id) return;
-    try { await collectionsAPI.endPoll(msg.collection_id); } catch (err) { console.error('Error ending poll:', err); }
+    try {
+      await collectionsAPI.endPoll(msg.collection_id);
+      setEnded(true);
+      if (onRefresh) onRefresh();
+    } catch (err) { console.error('Error ending poll:', err); }
   };
+
   return (
     <div style={cardBase}>
-      <div style={{ ...cardLabel, color: '#9b59b6' }}>Poll</div>
+      <div style={{ ...cardLabel, color: '#9b59b6' }}>{ended ? 'Poll (ended)' : 'Poll'}</div>
       <p style={cardTitle}>{msg.collection_title || msg.message_text}</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        {options.map(opt => (
-          <button key={opt.id} onClick={() => handleVote(opt.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e0e0e0', backgroundColor: '#fafafa', cursor: 'pointer', fontSize: '14px', color: theme.colors.textDark }}>
-            <span>{opt.text}</span>
-            <span style={{ fontSize: '12px', color: theme.colors.textLight, fontWeight: '600' }}>{opt.vote_count || 0}</span>
-          </button>
-        ))}
+        {options.map(opt => {
+          const pct = totalVotes > 0 ? Math.round((opt.vote_count || 0) / totalVotes * 100) : 0;
+          const showBar = hasVoted || ended;
+          return (
+            <button
+              key={opt.id}
+              onClick={() => handleVote(opt.id)}
+              disabled={hasVoted || ended || voting}
+              style={{
+                position: 'relative', display: 'flex', justifyContent: 'space-between',
+                alignItems: 'center', padding: '10px 14px', borderRadius: '10px',
+                border: '1px solid #e0e0e0', backgroundColor: '#fafafa',
+                cursor: hasVoted || ended ? 'default' : 'pointer',
+                fontSize: '14px', color: theme.colors.textDark, overflow: 'hidden',
+                opacity: voting ? 0.6 : 1,
+              }}
+            >
+              {showBar && (
+                <div style={{
+                  position: 'absolute', left: 0, top: 0, bottom: 0,
+                  width: `${pct}%`, backgroundColor: 'rgba(116, 153, 182, 0.15)',
+                  borderRadius: '10px', transition: 'width 0.3s',
+                }} />
+              )}
+              <span style={{ position: 'relative', zIndex: 1 }}>{opt.text}</span>
+              <span style={{
+                position: 'relative', zIndex: 1,
+                fontSize: '12px', color: theme.colors.textMedium, fontWeight: '600',
+              }}>
+                {showBar ? `${pct}%` : ''} {opt.vote_count || 0}
+              </span>
+            </button>
+          );
+        })}
       </div>
-      {isCreator && (
-        <button onClick={handleEnd} style={{ marginTop: '10px', padding: '8px 18px', borderRadius: '20px', border: 'none', backgroundColor: theme.colors.primary, color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>End voting</button>
+      {totalVotes > 0 && (
+        <p style={{ fontSize: '12px', color: theme.colors.textLight, margin: '6px 0 0' }}>
+          {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+        </p>
+      )}
+      {isCreator && !ended && (
+        <button onClick={handleEnd} style={{
+          marginTop: '10px', padding: '8px 18px', borderRadius: '20px', border: 'none',
+          backgroundColor: theme.colors.primary, color: '#fff', fontSize: '13px',
+          fontWeight: '600', cursor: 'pointer',
+        }}>End voting</button>
       )}
     </div>
   );
@@ -472,7 +533,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
               <div key={msg.id} style={{ maxWidth: '85%', marginBottom: '4px', marginLeft: isOwn ? 0 : '36px' }}>
                 {msg.message_type === 'goal' && <GoalCard msg={msg} />}
                 {msg.message_type === 'ask' && <AskCard msg={msg} />}
-                {msg.message_type === 'poll' && <PollCard msg={msg} currentUserId={currentUserId} />}
+                {msg.message_type === 'poll' && <PollCard msg={msg} currentUserId={currentUserId} onRefresh={loadMessages} />}
                 {msg.message_type === 'note' && <NoteCard msg={msg} />}
                 {msg.message_type === 'meetup' && <MeetupCard msg={msg} />}
               </div>
