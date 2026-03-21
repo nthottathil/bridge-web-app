@@ -581,17 +581,21 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
     <div style={{
       height: '100vh', display: 'flex', flexDirection: 'column',
       backgroundColor: '#EDF1F5',
+      width: '100%', maxWidth: '100vw', overflow: 'hidden',
+      boxSizing: 'border-box',
     }}>
       {/* ─── Header ─── */}
       <div style={{
         background: 'linear-gradient(135deg, #7499B6 0%, #3a6a7a 100%)',
         color: '#fff',
-        padding: '0 10px',
+        padding: '0 8px',
         height: '56px',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '4px',
         flexShrink: 0,
+        boxSizing: 'border-box',
+        width: '100%',
       }}>
         <button onClick={onBack} style={headerIconBtn} aria-label="Back">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -607,9 +611,9 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
         </span>
 
         <button style={{
-          padding: '5px 16px', borderRadius: '20px',
+          padding: '5px 12px', borderRadius: '20px',
           border: '1.5px solid rgba(255,255,255,0.5)', backgroundColor: 'transparent',
-          color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+          color: '#fff', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
           flexShrink: 0,
         }}>
           Meetup
@@ -637,8 +641,8 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
 
       {/* ─── Messages Area ─── */}
       <div style={{
-        flex: 1, overflowY: 'auto',
-        padding: '12px 16px 0',
+        flex: 1, overflowY: 'auto', overflowX: 'hidden',
+        padding: '12px 12px 0',
         display: 'flex', flexDirection: 'column',
       }}>
         {messages.length === 0 ? (
@@ -653,20 +657,25 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
 
       {/* ─── Input Area ─── */}
       <div style={{
-        padding: '8px 12px',
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+        padding: '8px 8px',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
         flexShrink: 0,
         position: 'relative',
         backgroundColor: '#EDF1F5',
+        boxSizing: 'border-box',
+        width: '100%',
       }}>
         <div style={{
           backgroundColor: '#fff',
           borderRadius: '30px',
-          padding: '8px 14px',
+          padding: '6px 10px',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
+          gap: '6px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          boxSizing: 'border-box',
+          width: '100%',
+          minWidth: 0,
         }}>
           {/* Plus button */}
           <button
@@ -687,7 +696,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
             background: 'none', border: 'none', padding: 0, cursor: 'pointer',
             color: '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
           }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
               <polyline points="21 15 16 10 5 21"/>
@@ -704,7 +713,8 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
             placeholder="Group chat"
             style={{
               flex: 1,
-              padding: '10px 16px',
+              minWidth: 0,
+              padding: '10px 12px',
               fontSize: '16px',
               border: '1px solid #e0e0e0',
               borderRadius: '22px',
@@ -712,6 +722,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
               backgroundColor: '#f4f4f4',
               color: theme.colors.textDark,
               WebkitAppearance: 'none',
+              boxSizing: 'border-box',
             }}
           />
 
@@ -720,7 +731,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
             background: 'none', border: 'none', padding: 0, cursor: 'pointer',
             color: isRecording ? '#c33' : '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
           }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="9" y="1" width="6" height="12" rx="3"/>
               <path d="M5 10a7 7 0 0014 0"/>
               <line x1="12" y1="17" x2="12" y2="21"/>
