@@ -11,6 +11,7 @@ from app.core.security import decode_access_token
 from app.models.user import User
 from app.models.group import Group, GroupMember
 from app.models.message import Message
+from app.models.collection import Poll, PollOption, PollVote, GroupGoal, Note, AskTheGroup
 from app.schemas.message import MessageCreate, MessageResponse
 from app.schemas.group import GroupResponse, GroupMemberResponse
 from app.services.group_service import (
@@ -230,19 +231,62 @@ def get_messages(
     # Order by creation time (oldest first) and limit
     messages = query.order_by(Message.created_at.asc()).limit(limit).all()
 
-    # Format response with user names
+    # Format response with user names and enrich special messages
     response = []
     for msg in messages:
         user = db.query(User).filter(User.id == msg.user_id).first()
-        response.append({
+        msg_type = getattr(msg, 'message_type', 'text') or 'text'
+        metadata = getattr(msg, 'metadata_json', None)
+        content_id = metadata.get('content_id') if isinstance(metadata, dict) else None
+
+        entry = {
             "id": msg.id,
             "group_id": msg.group_id,
             "user_id": msg.user_id,
             "message_text": msg.message_text,
-            "message_type": getattr(msg, 'message_type', 'text') or 'text',
-            "metadata_json": getattr(msg, 'metadata_json', None),
+            "message_type": msg_type,
+            "metadata_json": metadata,
             "created_at": msg.created_at,
-            "user_first_name": user.first_name if user else "Unknown"
-        })
+            "user_first_name": user.first_name if user else "Unknown",
+            "collection_id": content_id,
+            "collection_title": None,
+            "poll_options": None,
+        }
+
+        # Enrich poll messages with options and vote counts
+        if msg_type == "poll" and content_id:
+            poll = db.query(Poll).filter(Poll.id == content_id).first()
+            if poll:
+                entry["collection_title"] = poll.question
+                entry["poll_options"] = [
+                    {
+                        "id": opt.id,
+                        "text": opt.text,
+                        "vote_count": db.query(PollVote).filter(
+                            PollVote.poll_option_id == opt.id
+                        ).count(),
+                    }
+                    for opt in poll.options
+                ]
+
+        # Enrich goal messages
+        elif msg_type == "goal" and content_id:
+            goal = db.query(GroupGoal).filter(GroupGoal.id == content_id).first()
+            if goal:
+                entry["collection_title"] = goal.title
+
+        # Enrich note messages
+        elif msg_type == "note" and content_id:
+            note = db.query(Note).filter(Note.id == content_id).first()
+            if note:
+                entry["collection_title"] = note.title
+
+        # Enrich ask messages
+        elif msg_type == "ask" and content_id:
+            ask = db.query(AskTheGroup).filter(AskTheGroup.id == content_id).first()
+            if ask:
+                entry["collection_title"] = ask.question
+
+        response.append(entry)
 
     return response
