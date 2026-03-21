@@ -254,8 +254,11 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
   const [loading, setLoading] = useState(false);
   const [showPlusMenu, setShowPlusMenu] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef(null);
   const lastMessageTime = useRef(null);
+  const imageInputRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
 
   const currentUserId = userData?.id || userData?.user_id;
 
@@ -311,6 +314,72 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  /* --- image upload --- */
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 800;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = (h / w) * maxDim; w = maxDim; }
+          else { w = (w / h) * maxDim; h = maxDim; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        try {
+          const sent = await groupsAPI.sendMessage(groupData.group_id, dataUrl);
+          setMessages(prev => [...prev, sent]);
+          lastMessageTime.current = sent.created_at;
+          scrollToBottom();
+        } catch (err) { console.error('Error sending image:', err); }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  /* --- voice recording --- */
+  const toggleRecording = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            const sent = await groupsAPI.sendMessage(groupData.group_id, '🎤 Voice note sent');
+            setMessages(prev => [...prev, sent]);
+            lastMessageTime.current = sent.created_at;
+            scrollToBottom();
+          } catch (err) { console.error('Error sending voice note:', err); }
+        };
+        reader.readAsDataURL(blob);
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Microphone access denied:', err);
     }
   };
 
@@ -420,7 +489,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
               marginLeft: isOwn ? 0 : '36px',
             }}>
               <div style={{
-                padding: '10px 16px',
+                padding: msg.message_text?.startsWith('data:image') ? '4px' : '10px 16px',
                 borderRadius: isOwn
                   ? (isFirst && isLast ? '20px' : isFirst ? '20px 20px 6px 20px' : isLast ? '20px 6px 20px 20px' : '20px 6px 6px 20px')
                   : (isFirst && isLast ? '20px' : isFirst ? '20px 20px 20px 6px' : isLast ? '6px 20px 20px 20px' : '6px 20px 20px 6px'),
@@ -429,8 +498,13 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
                 boxShadow: isOwn ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
                 fontSize: '15px',
                 lineHeight: '1.4',
+                overflow: 'hidden',
               }}>
-                {msg.message_text}
+                {msg.message_text?.startsWith('data:image') ? (
+                  <img src={msg.message_text} alt="Shared" style={{
+                    maxWidth: '100%', borderRadius: '16px', display: 'block',
+                  }} />
+                ) : msg.message_text}
               </div>
             </div>
           );
@@ -548,7 +622,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
           </button>
 
           {/* Gallery / image icon */}
-          <button style={{
+          <button onClick={() => imageInputRef.current?.click()} style={{
             background: 'none', border: 'none', padding: 0, cursor: 'pointer',
             color: '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
           }}>
@@ -558,6 +632,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
               <polyline points="21 15 16 10 5 21"/>
             </svg>
           </button>
+          <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
 
           {/* Text input */}
           <input
@@ -580,9 +655,9 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
           />
 
           {/* Microphone icon */}
-          <button style={{
+          <button onClick={toggleRecording} style={{
             background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-            color: '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
+            color: isRecording ? '#c33' : '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
           }}>
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="9" y="1" width="6" height="12" rx="3"/>
