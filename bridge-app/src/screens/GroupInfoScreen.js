@@ -114,8 +114,8 @@ function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCo
                 margin: '0 auto',
                 overflow: 'hidden',
               }}>
-                {member.photo_url ? (
-                  <img src={member.photo_url} alt={member.first_name} style={{
+                {member.profile_photo_url ? (
+                  <img src={member.profile_photo_url} alt={member.first_name} style={{
                     width: '100%', height: '100%', objectFit: 'cover',
                   }} />
                 ) : (
