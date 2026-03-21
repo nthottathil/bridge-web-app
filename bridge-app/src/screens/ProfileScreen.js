@@ -593,6 +593,17 @@ function ProfileScreen({ onBack, onLogout }) {
           </div>
         )}
 
+        {/* Log Out */}
+        <button onClick={onLogout} style={{
+          width: 'calc(100% - 32px)', margin: '0 16px',
+          padding: '14px', fontSize: '15px', fontWeight: '500',
+          backgroundColor: 'transparent', color: theme.colors.error,
+          border: `1.5px solid ${theme.colors.error}`, borderRadius: '25px',
+          cursor: 'pointer',
+        }}>
+          Log Out
+        </button>
+
         <div style={{ height: '40px' }} />
       </div>
     </div>
