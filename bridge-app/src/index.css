@@ -4,11 +4,64 @@
   padding: 0;
 }
 
+:root {
+  --app-max-width: 100%;
+  --app-padding: 16px;
+  --bottom-nav-height: 60px;
+  --card-padding: 20px;
+  --heading-size: 20px;
+  --body-size: 14px;
+}
+
+/* Small phones */
+@media (min-width: 375px) {
+  :root {
+    --app-max-width: 100%;
+  }
+}
+
+/* Larger phones / small tablets */
+@media (min-width: 480px) {
+  :root {
+    --app-max-width: 460px;
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) {
+  :root {
+    --app-max-width: 600px;
+    --app-padding: 24px;
+    --card-padding: 28px;
+    --heading-size: 24px;
+    --body-size: 15px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  :root {
+    --app-max-width: 680px;
+    --app-padding: 32px;
+    --card-padding: 32px;
+    --heading-size: 26px;
+    --body-size: 16px;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+  :root {
+    --app-max-width: 720px;
+  }
+}
+
 body {
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #f8f9fa;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: var(--body-size);
 }
 
 #root {
@@ -100,4 +153,17 @@ button:active:not(:disabled) {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Safe area support for notched devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

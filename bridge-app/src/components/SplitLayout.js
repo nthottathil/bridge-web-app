@@ -11,11 +11,11 @@ function SplitLayout({ rightContent, leftTitle, currentTab, subtitle, greeting, 
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'flex-start',
-      padding: '20px 16px 80px',
+      padding: '20px var(--app-padding, 16px) 80px',
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '430px',
+        maxWidth: 'var(--app-max-width, 100%)',
         animation: 'fadeIn 0.4s ease',
       }}>
         {/* Tab Header */}

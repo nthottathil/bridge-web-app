@@ -184,7 +184,7 @@ function CollectionsScreen({ groupData, onBack }) {
       background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
       padding: '20px 16px 80px',
     }}>
-      <div style={{ maxWidth: '430px', margin: '0 auto' }}>
+      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
           {onBack && (

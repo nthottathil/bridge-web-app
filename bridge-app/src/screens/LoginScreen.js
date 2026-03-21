@@ -43,7 +43,7 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '430px',
+        maxWidth: 'var(--app-max-width, 100%)',
         animation: 'fadeIn 0.4s ease',
       }}>
         <div style={{ marginBottom: '24px' }}><BridgeLogo /></div>

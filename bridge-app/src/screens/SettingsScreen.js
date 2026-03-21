@@ -122,7 +122,7 @@ function SettingsScreen({ groupData, onBack, onLeaveGroup }) {
         </div>
       </div>
 
-      <div style={{ maxWidth: '430px', margin: '0 auto', padding: '20px 16px 80px' }}>
+      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto', padding: '20px 16px 80px' }}>
 
         {/* Notifications section */}
         <div style={{
