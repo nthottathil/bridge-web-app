@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { groupsAPI, groupSettingsAPI, collectionsAPI } from '../services/api';
 import { theme } from '../theme';
 
-function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCollections }) {
+function GroupInfoScreen({ groupData, setGroupData, userData, onBack, onChat, onSettings, onCollections }) {
   const [timeline, setTimeline] = useState([]);
   const [lastMessage, setLastMessage] = useState(null);
   const [latestAsk, setLatestAsk] = useState(null);
   const [expandedWeek, setExpandedWeek] = useState(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const nameInputRef = useRef(null);
 
   const members = groupData?.members || [];
-  const groupName = groupData?.name || 'The four builders';
+  const groupName = groupData?.group_name || 'The four builders';
   const createdDate = groupData?.created_at
     ? new Date(groupData.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     : '10 March 2025';
@@ -48,6 +51,27 @@ function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCo
     return 'future';
   };
 
+  const startEditName = () => {
+    setNameDraft(groupName);
+    setEditingName(true);
+    setTimeout(() => nameInputRef.current?.focus(), 50);
+  };
+
+  const saveName = async () => {
+    const trimmed = nameDraft.trim();
+    if (!trimmed || trimmed === groupName) {
+      setEditingName(false);
+      return;
+    }
+    try {
+      await groupSettingsAPI.updateGroupName(groupData.group_id, trimmed);
+      setGroupData(prev => ({ ...prev, group_name: trimmed }));
+    } catch (err) {
+      console.error('Error updating group name:', err);
+    }
+    setEditingName(false);
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -76,10 +100,38 @@ function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCo
           </button>
 
           {/* Group title */}
-          <div style={{ textAlign: 'center', flex: 1 }}>
-            <h1 style={{
-              fontSize: '20px', fontWeight: '700', color: '#fff', margin: 0,
-            }}>{groupName}</h1>
+          <div style={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
+            {editingName ? (
+              <input
+                ref={nameInputRef}
+                value={nameDraft}
+                onChange={e => setNameDraft(e.target.value)}
+                onBlur={saveName}
+                onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false); }}
+                style={{
+                  fontSize: '20px', fontWeight: '700', color: '#fff',
+                  background: 'rgba(255,255,255,0.15)',
+                  border: '1px solid rgba(255,255,255,0.5)',
+                  borderRadius: '8px', padding: '4px 12px',
+                  outline: 'none', textAlign: 'center',
+                  width: '100%', boxSizing: 'border-box',
+                }}
+              />
+            ) : (
+              <h1
+                onClick={startEditName}
+                style={{
+                  fontSize: '20px', fontWeight: '700', color: '#fff', margin: 0,
+                  cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
+                }}
+              >
+                {groupName}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </h1>
+            )}
             <p style={{
               fontSize: '12px', color: 'rgba(255,255,255,0.7)', margin: '4px 0 0',
             }}>Group created {createdDate}</p>
@@ -114,8 +166,8 @@ function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCo
                 margin: '0 auto',
                 overflow: 'hidden',
               }}>
-                {member.photo_url ? (
-                  <img src={member.photo_url} alt={member.first_name} style={{
+                {member.profile_photo_url ? (
+                  <img src={member.profile_photo_url} alt={member.first_name} style={{
                     width: '100%', height: '100%', objectFit: 'cover',
                   }} />
                 ) : (

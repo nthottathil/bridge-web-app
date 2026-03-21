@@ -271,6 +271,7 @@ function AppContent() {
         <div style={{ minHeight: '100vh' }}>
           <GroupInfoScreen
             groupData={groupData}
+            setGroupData={setGroupData}
             userData={userData}
             onBack={() => setPostView('chat')}
             onChat={() => setPostView('chat')}
@@ -313,6 +314,7 @@ function AppContent() {
           <HomeScreen
             userData={userData}
             groupData={groupData}
+            setGroupData={setGroupData}
             onProfile={() => setShowProfile(true)}
             onChat={() => setPostView('chat')}
             onCalendar={() => setPostView('calendar')}
