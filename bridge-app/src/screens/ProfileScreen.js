@@ -343,6 +343,15 @@ function ProfileScreen({ onBack, onLogout }) {
           }}>
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
+
+          <button onClick={onLogout} style={{
+            width: '100%', padding: '14px', fontSize: '15px', fontWeight: '500',
+            backgroundColor: 'transparent', color: theme.colors.error,
+            border: `1.5px solid ${theme.colors.error}`, borderRadius: '25px',
+            cursor: 'pointer', marginTop: '12px',
+          }}>
+            Log Out
+          </button>
         </div>
       </div>
     );
