@@ -266,25 +266,23 @@ def find_potential_matches(db: Session, user: User, limit: int = 20) -> List[Dic
         # Calculate compatibility score
         compatibility = calculate_compatibility_score(user, other_user)
 
-        # Only include matches with score >= 50
-        if compatibility >= 50:
-            potential_matches.append({
-                'user_id': other_user.id,
-                'first_name': other_user.first_name,
-                'age': other_user.age,
-                'profession': other_user.profession,
-                'statement': other_user.statement,
-                'interests': other_user.interests,
-                'compatibility_score': compatibility,
-                'location': other_user.location,
-                'primary_goal': other_user.primary_goal,
-                'focus': getattr(other_user, 'focus', None),
-                'headline': getattr(other_user, 'headline', None),
-                'profile_photo_url': getattr(other_user, 'profile_photo_url', None),
-            })
+        potential_matches.append({
+            'user_id': other_user.id,
+            'first_name': other_user.first_name,
+            'age': other_user.age,
+            'profession': other_user.profession,
+            'statement': other_user.statement,
+            'interests': other_user.interests,
+            'compatibility_score': compatibility,
+            'location': other_user.location,
+            'primary_goal': other_user.primary_goal,
+            'focus': getattr(other_user, 'focus', None),
+            'headline': getattr(other_user, 'headline', None),
+            'profile_photo_url': getattr(other_user, 'profile_photo_url', None),
+        })
 
     # Sort by compatibility score (highest first)
     potential_matches.sort(key=lambda x: x['compatibility_score'], reverse=True)
 
-    # Return top matches
+    # Return top matches (always return the closest ones regardless of score)
     return potential_matches[:limit]

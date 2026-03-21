@@ -58,7 +58,7 @@ def get_matches(
     db: Session = Depends(get_db)
 ):
     """
-    Get top 3 potential matches for the current user.
+    Get top 3 closest matches for the current user.
 
     Returns the 3 users with highest compatibility scores.
     Filters out users already in groups and those with pending requests.
