@@ -13,13 +13,13 @@ function Checkbox({ label, checked, onChange }) {
         style={{
           width: '22px',
           height: '22px',
-          border: `2px solid ${checked ? '#2D4F5C' : '#ddd'}`,
+          border: `2px solid ${checked ? '#7499B6' : '#ddd'}`,
           borderRadius: '5px',
           marginRight: '12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: checked ? '#2D4F5C' : '#fff',
+          backgroundColor: checked ? '#7499B6' : '#fff',
           transition: 'all 0.2s'
         }}
       >

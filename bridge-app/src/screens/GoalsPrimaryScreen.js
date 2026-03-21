@@ -78,7 +78,7 @@ function GoalsPrimaryScreen({ data, update, onNext, onBack }) {
                   padding: '10px 16px',
                   borderRadius: '25px',
                   border: 'none',
-                  backgroundColor: '#2D4F5C',
+                  backgroundColor: '#7499B6',
                   color: '#fff',
                   fontSize: '14px',
                   cursor: 'pointer',
