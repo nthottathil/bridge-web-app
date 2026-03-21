@@ -91,6 +91,7 @@ function AppContent() {
     setIsAuthenticated(true);
     setUserData(prev => ({
       ...prev,
+      id: profile.id || prev.id,
       firstName: profile.first_name || prev.firstName,
       surname: profile.surname || prev.surname,
       email: profile.email || prev.email,
