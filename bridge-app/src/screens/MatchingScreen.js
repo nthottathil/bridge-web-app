@@ -240,7 +240,7 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
         background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
         padding: '0 0 40px',
       }}>
-        <div style={{ maxWidth: '430px', margin: '0 auto' }}>
+        <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto' }}>
           {/* Back button */}
           <div style={{ padding: '16px' }}>
             <button onClick={() => setView('carousel')} style={{
@@ -463,9 +463,9 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
     <div style={{
       minHeight: '100vh',
       background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
-      padding: '20px 16px',
+      padding: '20px var(--app-padding, 16px)',
     }}>
-      <div style={{ maxWidth: '430px', margin: '0 auto' }}>
+      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto' }}>
         {/* Header */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',

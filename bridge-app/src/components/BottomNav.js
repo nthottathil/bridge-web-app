@@ -44,10 +44,11 @@ function BottomNav({ activeTab, onTabChange }) {
       display: 'flex',
       justifyContent: 'center',
       zIndex: 100,
+      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
     }}>
       <div style={{
         display: 'flex',
-        maxWidth: '430px',
+        maxWidth: 'var(--app-max-width, 100%)',
         width: '100%',
       }}>
         {tabs.map(tab => {

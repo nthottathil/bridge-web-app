@@ -69,9 +69,9 @@ function HomeScreen({ userData, groupData, onProfile, onChat, onCalendar, onGrou
     <div style={{
       minHeight: '100vh',
       background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
-      padding: '20px 16px 90px',
+      padding: '20px var(--app-padding, 16px) 90px',
     }}>
-      <div style={{ maxWidth: '430px', margin: '0 auto' }}>
+      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto' }}>
 
         {/* Header */}
         <div style={{

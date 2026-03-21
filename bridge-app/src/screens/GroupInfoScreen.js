@@ -60,7 +60,7 @@ function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCo
         borderRadius: '0 0 24px 24px',
       }}>
         <div style={{
-          maxWidth: '430px', margin: '0 auto',
+          maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           {/* Back arrow */}
@@ -100,7 +100,7 @@ function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCo
 
         {/* Member avatars row */}
         <div style={{
-          maxWidth: '430px', margin: '20px auto 0',
+          maxWidth: 'var(--app-max-width, 100%)', margin: '20px auto 0',
           display: 'flex', justifyContent: 'center', gap: '20px',
         }}>
           {members.map((member, i) => (
@@ -132,7 +132,7 @@ function GroupInfoScreen({ groupData, userData, onBack, onChat, onSettings, onCo
       </div>
 
       {/* Content sections */}
-      <div style={{ maxWidth: '430px', margin: '0 auto', padding: '16px 16px 80px' }}>
+      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto', padding: '16px 16px 80px' }}>
 
         {/* Chat section */}
         <div

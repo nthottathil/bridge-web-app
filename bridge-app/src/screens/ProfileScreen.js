@@ -185,7 +185,7 @@ function ProfileScreen({ onBack, onLogout }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          maxWidth: '430px',
+          maxWidth: 'var(--app-max-width, 100%)',
           margin: '0 auto',
         }}>
           <button onClick={() => setEditing(false)} style={{
@@ -206,7 +206,7 @@ function ProfileScreen({ onBack, onLogout }) {
           }}>Log Out</button>
         </div>
 
-        <div style={{ maxWidth: '430px', margin: '0 auto', padding: '0 16px 100px' }}>
+        <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto', padding: '0 16px 100px' }}>
           <h2 style={{ fontSize: '22px', fontWeight: '600', color: theme.colors.textDark, marginBottom: '16px' }}>
             Edit Profile
           </h2>
@@ -363,7 +363,7 @@ function ProfileScreen({ onBack, onLogout }) {
       minHeight: '100vh',
       background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
     }}>
-      <div style={{ maxWidth: '430px', margin: '0 auto', paddingTop: '16px' }}>
+      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto', paddingTop: '16px' }}>
         {/* Profile hero card */}
         <div style={{
           backgroundColor: theme.colors.surfaceCard,
