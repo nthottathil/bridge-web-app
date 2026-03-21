@@ -33,7 +33,11 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
       setTimeout(() => setMatchState('found'), 1500);
     } catch (err) {
       console.error('Error loading matches:', err);
-      setError(err.response?.data?.detail || 'Failed to load matches');
+      // Don't show error if user is already in a group — that's expected
+      const detail = err.response?.data?.detail || '';
+      if (!detail.toLowerCase().includes('already in a group')) {
+        setError(detail || 'Failed to load matches');
+      }
       setMatchState('found');
     } finally {
       setLoading(false);

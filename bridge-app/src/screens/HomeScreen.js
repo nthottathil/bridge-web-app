@@ -103,9 +103,9 @@ function HomeScreen({ userData, groupData, onProfile, onChat, onCalendar, onGrou
           boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            {userData.profile_photo ? (
+            {userData.profilePhoto ? (
               <img
-                src={userData.profile_photo}
+                src={userData.profilePhoto}
                 alt={userData.firstName}
                 style={{
                   width: '56px', height: '56px', borderRadius: '50%',
@@ -218,8 +218,8 @@ function HomeScreen({ userData, groupData, onProfile, onChat, onCalendar, onGrou
                   zIndex: members.length - i,
                   overflow: 'hidden',
                 }}>
-                  {member.profile_photo ? (
-                    <img src={member.profile_photo} alt="" style={{
+                  {member.profile_photo_url ? (
+                    <img src={member.profile_photo_url} alt="" style={{
                       width: '100%', height: '100%', objectFit: 'cover',
                     }} />
                   ) : (
