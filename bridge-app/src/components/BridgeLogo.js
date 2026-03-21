@@ -12,7 +12,7 @@ function BridgeLogo() {
         {/* 4-pointed star cutout */}
         <path 
           d="M16 22 L18.5 16 L21 22 L27 24.5 L21 27 L18.5 33 L16 27 L10 24.5 Z" 
-          fill="#2D4F5C"
+          fill="#7499B6"
         />
       </svg>
       <span style={{ 

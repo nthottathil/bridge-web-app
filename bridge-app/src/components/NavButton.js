@@ -16,7 +16,7 @@ function NavButton({ onClick, direction = 'next', disabled = false, label }) {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
-        backgroundColor: isNext ? '#2D4F5C' : '#f0f0f0',
+        backgroundColor: isNext ? '#7499B6' : '#f0f0f0',
         color: isNext ? '#fff' : '#333',
         opacity: disabled ? 0.4 : 1,
         fontSize: '15px',

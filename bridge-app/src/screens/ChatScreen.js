@@ -424,7 +424,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
                 borderRadius: isOwn
                   ? (isFirst && isLast ? '20px' : isFirst ? '20px 20px 6px 20px' : isLast ? '20px 6px 20px 20px' : '20px 6px 6px 20px')
                   : (isFirst && isLast ? '20px' : isFirst ? '20px 20px 20px 6px' : isLast ? '6px 20px 20px 20px' : '6px 20px 20px 6px'),
-                backgroundColor: isOwn ? '#2D4F5C' : '#fff',
+                backgroundColor: isOwn ? '#7499B6' : '#fff',
                 color: isOwn ? '#fff' : theme.colors.textDark,
                 boxShadow: isOwn ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
                 fontSize: '15px',
@@ -449,7 +449,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
     }}>
       {/* ─── Header ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #2D4F5C 0%, #3a6a7a 100%)',
+        background: 'linear-gradient(135deg, #7499B6 0%, #3a6a7a 100%)',
         color: '#fff',
         padding: '0 10px',
         height: '56px',

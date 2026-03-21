@@ -7,8 +7,8 @@ function SelectionChip({ label, selected, onClick, ranked }) {
       style={{
         padding: '11px 20px',
         borderRadius: '25px',
-        border: `1.5px solid ${selected ? '#2D4F5C' : '#ccc'}`,
-        backgroundColor: selected ? '#2D4F5C' : 'transparent',
+        border: `1.5px solid ${selected ? '#7499B6' : '#ccc'}`,
+        backgroundColor: selected ? '#7499B6' : 'transparent',
         color: selected ? '#fff' : '#1a1a1a',
         fontSize: '14px',
         cursor: 'pointer',

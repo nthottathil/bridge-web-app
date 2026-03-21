@@ -68,7 +68,7 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
           justifyContent: 'space-between',
           marginBottom: '16px',
           fontSize: '15px',
-          color: '#2D4F5C',
+          color: '#7499B6',
           fontWeight: '600'
         }}>
           <span>{minValue}</span>
@@ -92,7 +92,7 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
             left: `${minPercent}%`,
             right: `${100 - maxPercent}%`,
             height: '100%',
-            backgroundColor: '#2D4F5C',
+            backgroundColor: '#7499B6',
             borderRadius: '3px'
           }} />
 
@@ -108,7 +108,7 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
               width: '20px',
               height: '20px',
               backgroundColor: '#fff',
-              border: '3px solid #2D4F5C',
+              border: '3px solid #7499B6',
               borderRadius: '50%',
               cursor: dragging === 'min' ? 'grabbing' : 'grab',
               boxShadow: dragging === 'min' ? '0 0 0 4px rgba(45, 79, 92, 0.1)' : '0 2px 4px rgba(0,0,0,0.1)',
@@ -130,7 +130,7 @@ function RangeSlider({ min, max, minValue, maxValue, onChange, label }) {
               width: '20px',
               height: '20px',
               backgroundColor: '#fff',
-              border: '3px solid #2D4F5C',
+              border: '3px solid #7499B6',
               borderRadius: '50%',
               cursor: dragging === 'max' ? 'grabbing' : 'grab',
               boxShadow: dragging === 'max' ? '0 0 0 4px rgba(45, 79, 92, 0.1)' : '0 2px 4px rgba(0,0,0,0.1)',
