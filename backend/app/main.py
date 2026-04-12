@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text, inspect
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api import auth, matches, groups, user, events, tasks, collections, meetups, friends, group_settings
+from app.api import auth, matches, groups, user, events, tasks, collections, meetups, friends, group_settings, admin
 # Ensure all models are imported so tables are registered
 from app.models import (  # noqa: F401
     User, Group, GroupMember, MatchRequest, Message,
@@ -97,6 +97,7 @@ app.include_router(collections.router)
 app.include_router(meetups.router)
 app.include_router(friends.router)
 app.include_router(group_settings.router)
+app.include_router(admin.router)
 
 @app.get("/")
 def read_root():
