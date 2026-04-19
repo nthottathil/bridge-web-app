@@ -50,7 +50,7 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
         <h1 style={{
           fontSize: '26px', fontWeight: '600',
           color: theme.colors.textDark, marginBottom: '24px',
-        }}>Let's create your account</h1>
+        }}>Log into your account</h1>
 
         <div style={{
           backgroundColor: theme.colors.surfaceCard,
