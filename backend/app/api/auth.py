@@ -164,10 +164,8 @@ def forgot_password(email: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
 
     if not user:
-        # Don't reveal whether the email exists
         return {"message": "If an account with that email exists, a reset code has been sent."}
 
-    # Generate reset code and store in verification_token
     reset_code = generate_verification_code()
     user.verification_token = reset_code
     db.commit()
