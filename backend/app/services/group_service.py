@@ -139,7 +139,7 @@ def get_group_info(db: Session, group_id: int) -> Optional[Dict[str, Any]]:
 
     return {
         "group_id": group.id,
-        "name": getattr(group, 'name', None),
+        "group_name": getattr(group, 'name', None),
         "created_at": group.created_at,
         "member_count": len(members),
         "members": members,
