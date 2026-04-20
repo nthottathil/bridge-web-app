@@ -4,7 +4,7 @@ from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token, generate_verification_code
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse, Token, VerifyEmail
-from app.services.email_service import send_verification_email
+from app.services.email_service import send_verification_email, send_password_reset_email
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -154,3 +154,50 @@ def resend_verification_code(email: str, db: Session = Depends(get_db)):
     send_verification_email(email, new_code)
 
     return {"message": "Verification code resent successfully"}
+
+
+@router.post("/forgot-password", response_model=dict)
+def forgot_password(email: str, db: Session = Depends(get_db)):
+    """
+    Send a password reset code to the user's email.
+    """
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        # Don't reveal whether the email exists
+        return {"message": "If an account with that email exists, a reset code has been sent."}
+
+    # Generate reset code and store in verification_token
+    reset_code = generate_verification_code()
+    user.verification_token = reset_code
+    db.commit()
+
+    send_password_reset_email(email, reset_code)
+
+    return {"message": "If an account with that email exists, a reset code has been sent."}
+
+
+@router.post("/reset-password", response_model=dict)
+def reset_password(email: str, code: str, new_password: str, db: Session = Depends(get_db)):
+    """
+    Reset password using the emailed code.
+    """
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    if not user.verification_token or user.verification_token != code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset code"
+        )
+
+    user.password_hash = hash_password(new_password)
+    user.verification_token = None
+    db.commit()
+
+    return {"message": "Password has been reset successfully"}

@@ -42,6 +42,14 @@ export const authAPI = {
     const response = await api.post('/auth/resend-code', { email });
     return response.data;
   },
+  forgotPassword: async (email) => {
+    const response = await api.post(`/auth/forgot-password?email=${encodeURIComponent(email)}`);
+    return response.data;
+  },
+  resetPassword: async (email, code, newPassword) => {
+    const response = await api.post(`/auth/reset-password?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}&new_password=${encodeURIComponent(newPassword)}`);
+    return response.data;
+  },
   logout: () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');

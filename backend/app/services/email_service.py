@@ -70,6 +70,59 @@ def send_verification_email(email: str, code: str) -> bool:
     return True
 
 
+def send_password_reset_email(email: str, code: str) -> bool:
+    """
+    Send password reset code to user's email using Resend.
+    """
+    print("\n" + "="*60)
+    print(f"[EMAIL] Sending password reset email to {email}")
+    print(f"Reset code: {code}")
+    print("="*60 + "\n")
+
+    if settings.RESEND_API_KEY:
+        try:
+            response = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "Bridge <noreply@thebridgeapp.online>",
+                    "to": [email],
+                    "subject": "Reset your Bridge password",
+                    "html": f"""
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #7499B6;">Reset your password</h2>
+                        <p>We received a request to reset your Bridge account password. Use the code below:</p>
+                        <div style="background-color: #edf1f5; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; color: #7499B6; letter-spacing: 5px; border-radius: 8px; margin: 20px 0;">
+                            {code}
+                        </div>
+                        <p>If you didn't request this, you can safely ignore this email.</p>
+                        <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                            Best regards,<br>
+                            The Bridge Team
+                        </p>
+                    </div>
+                    """
+                }
+            )
+            if response.status_code == 200:
+                print(f"[OK] Password reset email sent to {email}")
+                return True
+            else:
+                print(f"[ERROR] Failed to send email: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            print(f"[ERROR] Error sending email: {e}")
+            return False
+    else:
+        print("[WARN] RESEND_API_KEY not configured - email not sent")
+        return True
+
+    return True
+
+
 def send_match_notification(email: str, matcher_name: str) -> bool:
     """
     Send notification when someone wants to match with user.
