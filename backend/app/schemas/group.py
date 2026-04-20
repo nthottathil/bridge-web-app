@@ -5,13 +5,13 @@ from datetime import datetime
 
 class GroupMemberResponse(BaseModel):
     user_id: int
-    first_name: str
+    first_name: Optional[str] = None
     surname: Optional[str] = None
-    age: int
-    profession: str
-    interests: List[str]
-    primary_goal: str
-    statement: str
+    age: Optional[int] = None
+    profession: Optional[str] = None
+    interests: Optional[List[str]] = []
+    primary_goal: Optional[str] = None
+    statement: Optional[str] = None
     location: Optional[str] = None
     focus: Optional[str] = None
     profile_photo_url: Optional[str] = None
