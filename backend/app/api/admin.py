@@ -13,6 +13,7 @@ from app.models.friend import Friend
 from app.models.collection import (
     Poll, PollVote, GroupGoal, PersonalGoal, Note, AskTheGroup, AskReply
 )
+from app.models.group import Group
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -93,3 +94,30 @@ def reset_account(
         "message": f"Account {email} has been reset successfully",
         "user_id": user_id
     }
+
+
+@router.get("/groups")
+def list_groups(db: Session = Depends(get_db)):
+    """List all groups with their names and member info."""
+    groups = db.query(Group).all()
+    result = []
+    for g in groups:
+        members = db.query(GroupMember).filter(GroupMember.group_id == g.id, GroupMember.status == "active").all()
+        member_names = []
+        for m in members:
+            user = db.query(User).filter(User.id == m.user_id).first()
+            if user:
+                member_names.append(user.first_name or user.email)
+        result.append({"id": g.id, "name": g.name, "members": member_names})
+    return result
+
+
+@router.put("/groups/{group_id}/name")
+def admin_rename_group(group_id: int, name: str, db: Session = Depends(get_db)):
+    """Rename a group by ID."""
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    group.name = name
+    db.commit()
+    return {"message": f"Group {group_id} renamed to '{name}'"}
