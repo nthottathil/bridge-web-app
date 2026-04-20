@@ -116,7 +116,9 @@ function AppContent() {
       country: profile.country || prev.country,
       profilePhoto: profile.profile_photo_url || prev.profilePhoto,
     }));
-    setCurrentStep(TOTAL_STEPS);
+    // If profile is incomplete (reset or new), restart onboarding; otherwise skip to app
+    const hasProfile = profile.first_name && profile.primary_goal && profile.interests?.length > 0;
+    setCurrentStep(hasProfile ? TOTAL_STEPS : 0);
   };
 
   const handleLogout = () => {
