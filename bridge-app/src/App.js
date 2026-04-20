@@ -182,14 +182,20 @@ function AppContent() {
     }
   };
 
-  // Check for group on post-onboarding load
+  // Check for group whenever authenticated (even during onboarding)
   useEffect(() => {
-    if (currentStep >= TOTAL_STEPS && isAuthenticated) {
+    if (isAuthenticated) {
       groupsAPI.getMyGroup()
-        .then(data => { if (data) { setGroupData(data); setPostView('home'); } })
+        .then(data => {
+          if (data) {
+            setGroupData(data);
+            setCurrentStep(TOTAL_STEPS);
+            setPostView('home');
+          }
+        })
         .catch(() => {});
     }
-  }, [currentStep, isAuthenticated]);
+  }, [isAuthenticated]);
 
   const refreshGroupData = async () => {
     try {

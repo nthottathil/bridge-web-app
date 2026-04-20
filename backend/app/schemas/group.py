@@ -23,7 +23,7 @@ class GroupMemberResponse(BaseModel):
 
 class GroupResponse(BaseModel):
     group_id: int
-    name: Optional[str] = None
+    group_name: Optional[str] = None
     created_at: datetime
     member_count: int
     members: List[GroupMemberResponse]
