@@ -121,3 +121,28 @@ def admin_rename_group(group_id: int, name: str, db: Session = Depends(get_db)):
     group.name = name
     db.commit()
     return {"message": f"Group {group_id} renamed to '{name}'"}
+
+
+@router.post("/groups/{group_id}/add-member")
+def admin_add_member(group_id: int, email: str, db: Session = Depends(get_db)):
+    """Add a user to a group by email."""
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Remove any existing active memberships
+    db.query(GroupMember).filter(
+        GroupMember.user_id == user.id,
+        GroupMember.status == "active"
+    ).update({"status": "left"})
+
+    # Add to new group
+    new_member = GroupMember(group_id=group_id, user_id=user.id, status="active")
+    db.add(new_member)
+    db.commit()
+
+    return {"message": f"{user.first_name or user.email} added to group {group_id}"}
