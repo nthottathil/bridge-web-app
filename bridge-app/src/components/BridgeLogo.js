@@ -1,25 +1,33 @@
 import React from 'react';
 
-function BridgeLogo() {
+function BridgeLogo({ size = 'medium' }) {
+  const sizes = {
+    small: { svg: 28, text: '24px' },
+    medium: { svg: 44, text: '40px' },
+    large: { svg: 72, text: '64px' },
+  };
+  const { svg, text } = sizes[size] || sizes.medium;
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <svg width="36" height="44" viewBox="0 0 36 44" fill="none">
-        {/* Capital B shape */}
-        <path 
-          d="M0 0 H18 C28 0 32 6 32 11 C32 15 29 18.5 24 19.5 C30 20.5 34 25 34 31 C34 38 28 44 18 44 H0 V0 Z" 
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
+      <svg width={svg * 0.85} height={svg} viewBox="0 0 34 44" fill="none">
+        <path
+          d="M0 0 H18 C28 0 32 6 32 11 C32 15 29 18.5 24 19.5 C30 20.5 34 25 34 31 C34 38 28 44 18 44 H0 V0 Z"
           fill="#fff"
         />
-        {/* 4-pointed star cutout */}
-        <path 
-          d="M16 22 L18.5 16 L21 22 L27 24.5 L21 27 L18.5 33 L16 27 L10 24.5 Z" 
-          fill="#7499B6"
+        <path
+          d="M14 11 L16 6.5 L18 11 L22.5 13 L18 15 L16 19.5 L14 15 L9.5 13 Z"
+          fill="#A8BDD0"
         />
       </svg>
-      <span style={{ 
-        fontSize: '20px', 
-        fontWeight: '600',
-        letterSpacing: '-0.5px'
-      }}>Bridge</span>
+      <span style={{
+        fontSize: text,
+        fontWeight: '800',
+        letterSpacing: '-1.5px',
+        color: '#fff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        marginLeft: '-2px',
+      }}>ridge</span>
     </div>
   );
 }
