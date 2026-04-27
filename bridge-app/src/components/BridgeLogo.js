@@ -16,7 +16,7 @@ function BridgeLogo({ size = 'medium' }) {
           fill="#fff"
         />
         <path
-          d="M13 6 L15.5 12 L22 14.5 L15.5 17 L13 23 L10.5 17 L4 14.5 L10.5 12 Z"
+          d="M13 13 L15.5 19.5 L22 22 L15.5 24.5 L13 31 L10.5 24.5 L4 22 L10.5 19.5 Z"
           fill="#A8BDD0"
         />
       </svg>
