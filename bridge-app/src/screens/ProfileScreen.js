@@ -18,7 +18,7 @@ const FOCUS_OPTIONS = [
   'Skills refiner', 'Side hustler', 'Explorer',
 ];
 
-function ProfileScreen({ onBack, onLogout }) {
+function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -343,6 +343,17 @@ function ProfileScreen({ onBack, onLogout }) {
           }}>
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
+
+          {onReplayOnboarding && (
+            <button onClick={onReplayOnboarding} style={{
+              width: '100%', padding: '14px', fontSize: '15px', fontWeight: '500',
+              backgroundColor: 'transparent', color: theme.colors.primary,
+              border: `1.5px solid ${theme.colors.primary}`, borderRadius: '25px',
+              cursor: 'pointer', marginTop: '12px',
+            }}>
+              Replay onboarding
+            </button>
+          )}
 
           <button onClick={onLogout} style={{
             width: '100%', padding: '14px', fontSize: '15px', fontWeight: '500',

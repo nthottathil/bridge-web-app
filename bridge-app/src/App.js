@@ -247,7 +247,11 @@ function AppContent() {
   if (showProfile) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <ProfileScreen onBack={() => setShowProfile(false)} onLogout={handleLogout} />
+        <ProfileScreen
+          onBack={() => setShowProfile(false)}
+          onLogout={handleLogout}
+          onReplayOnboarding={() => { setShowProfile(false); setCurrentStep(0); }}
+        />
       </div>
     );
   }
