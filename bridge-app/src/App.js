@@ -32,6 +32,37 @@ import { authAPI, groupsAPI } from './services/api';
 
 const TOTAL_STEPS = 9;
 
+const EMPTY_USER_DATA = {
+  firstName: '',
+  surname: '',
+  email: '',
+  age: 0,
+  profession: '',
+  gender: '',
+  ageCollabOnly: false,
+  genderCollabOnly: false,
+  location: '',
+  country: '',
+  maxDistance: 5,
+  focus: '',
+  headline: '',
+  statement: '',
+  profilePhoto: '',
+  primaryGoal: '',
+  perspectiveAnswers: {},
+  interests: [],
+  commitmentLevel: '',
+  dealBreakers: [],
+  personality: {
+    extroversion: 50,
+    openness: 50,
+    agreeableness: 50,
+    conscientiousness: 50,
+  },
+  genderPreference: ['Any'],
+  agePreference: { min: 18, max: 99 },
+};
+
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
@@ -41,36 +72,7 @@ function AppContent() {
   const [postView, setPostView] = useState('matching');
   const [hideFloatingNav, setHideFloatingNav] = useState(false);
   const [groupData, setGroupData] = useState(null);
-  const [userData, setUserData] = useState({
-    firstName: '',
-    surname: '',
-    email: '',
-    age: 0,
-    profession: '',
-    gender: '',
-    ageCollabOnly: false,
-    genderCollabOnly: false,
-    location: '',
-    country: '',
-    maxDistance: 5,
-    focus: '',
-    headline: '',
-    statement: '',
-    profilePhoto: '',
-    primaryGoal: '',
-    perspectiveAnswers: {},
-    interests: [],
-    commitmentLevel: '',
-    dealBreakers: [],
-    personality: {
-      extroversion: 50,
-      openness: 50,
-      agreeableness: 50,
-      conscientiousness: 50,
-    },
-    genderPreference: ['Any'],
-    agePreference: { min: 18, max: 99 },
-  });
+  const [userData, setUserData] = useState(EMPTY_USER_DATA);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -250,7 +252,11 @@ function AppContent() {
         <ProfileScreen
           onBack={() => setShowProfile(false)}
           onLogout={handleLogout}
-          onReplayOnboarding={() => { setShowProfile(false); setCurrentStep(0); }}
+          onReplayOnboarding={() => {
+            setShowProfile(false);
+            setUserData(prev => ({ ...EMPTY_USER_DATA, id: prev.id, email: prev.email }));
+            setCurrentStep(0);
+          }}
         />
       </div>
     );
