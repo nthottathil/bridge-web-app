@@ -252,8 +252,38 @@ function AppContent() {
         <ProfileScreen
           onBack={() => setShowProfile(false)}
           onLogout={handleLogout}
-          onReplayOnboarding={() => {
+          onReplayOnboarding={async () => {
             setShowProfile(false);
+            try {
+              const profile = await authAPI.getProfile();
+              setUserData(prev => ({
+                ...prev,
+                id: profile.id || prev.id,
+                firstName: profile.first_name || prev.firstName,
+                surname: profile.surname || prev.surname,
+                email: profile.email || prev.email,
+                age: profile.age || prev.age,
+                profession: profile.profession || prev.profession,
+                gender: profile.gender || prev.gender,
+                primaryGoal: profile.primary_goal || prev.primaryGoal,
+                interests: profile.interests || prev.interests,
+                personality: profile.personality || prev.personality,
+                genderPreference: profile.gender_preference || prev.genderPreference,
+                agePreference: profile.age_preference || prev.agePreference,
+                statement: profile.statement || prev.statement,
+                location: profile.location || prev.location,
+                maxDistance: profile.max_distance || prev.maxDistance,
+                focus: profile.focus || prev.focus,
+                headline: profile.headline || prev.headline,
+                commitmentLevel: profile.commitment_level || prev.commitmentLevel,
+                dealBreakers: profile.deal_breakers || prev.dealBreakers,
+                perspectiveAnswers: profile.perspective_answers || prev.perspectiveAnswers,
+                country: profile.country || prev.country,
+                profilePhoto: profile.profile_photo_url || prev.profilePhoto,
+              }));
+            } catch (err) {
+              console.error('Failed to refresh profile for replay:', err);
+            }
             setCurrentStep(0);
           }}
         />
