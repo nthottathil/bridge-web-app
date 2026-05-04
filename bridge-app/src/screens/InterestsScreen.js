@@ -1,28 +1,24 @@
-import React, { useState } from 'react';
-import { SplitLayout, SelectionChip } from '../components';
+import React from 'react';
+import { SplitLayout } from '../components';
+import { theme } from '../theme';
 
 const ALL_INTERESTS = [
-  'Fitness', 'Tech', 'Startups', 'AI', 'Books', 'Travel',
-  'Music', 'Photography', 'Film', 'Art', 'Design', 'Writing',
-  'Gaming', 'Cooking', 'Yoga', 'Running', 'Football', 'Tennis',
-  'Cycling', 'Hiking', 'Swimming', 'Dance', 'Theatre', 'Fashion',
-  'Crypto', 'Marketing', 'Finance', 'Volunteering', 'Languages',
-  'Meditation', 'Podcasts', 'Networking', 'Gardening',
+  'Technology', 'Sciences', 'Social', 'Humanity', 'Business', 'Finance',
+  'Lifestyle', 'Art', 'Music', 'Gaming', 'Creativity', 'Sport',
+  'Fitness', 'Travel', 'Mindset', 'Wellbeing', 'Food & Drink',
 ];
 
-function InterestsScreen({ data, update, onNext, onBack }) {
-  const [search, setSearch] = useState('');
+const MAX_SELECTIONS = 5;
 
-  const filtered = search
-    ? ALL_INTERESTS.filter(i => i.toLowerCase().includes(search.toLowerCase()))
-    : ALL_INTERESTS;
+function InterestsScreen({ data, update }) {
+  const interests = data.interests || [];
 
   const toggleInterest = (interest) => {
-    const current = [...data.interests];
+    const current = [...interests];
     const index = current.indexOf(interest);
     if (index > -1) {
       current.splice(index, 1);
-    } else {
+    } else if (current.length < MAX_SELECTIONS) {
       current.push(interest);
     }
     update('interests', current);
@@ -31,52 +27,58 @@ function InterestsScreen({ data, update, onNext, onBack }) {
   return (
     <SplitLayout
       currentTab={2}
-      leftTitle="Your interests"
-      subtitle="Select at least 3 interests. These help us find your people."
+      leftTitle="Interests"
+      subtitle={`Rank your top ${MAX_SELECTIONS} interests by clicking them in order [1: most favourite, ${MAX_SELECTIONS}: least favourite]. ${interests.length}/${MAX_SELECTIONS} selected.`}
       rightContent={
-        <div>
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search interests..."
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              borderRadius: '25px',
-              border: '1.5px solid #ccc',
-              fontSize: '14px',
-              outline: 'none',
-              backgroundColor: 'transparent',
-              marginBottom: '16px',
-            }}
-          />
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '10px',
-            maxHeight: '320px',
-            overflowY: 'auto',
-            paddingRight: '4px',
-          }}>
-            {filtered.map(interest => (
-              <SelectionChip
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '10px',
+          padding: '4px',
+        }}>
+          {ALL_INTERESTS.map(interest => {
+            const rank = interests.indexOf(interest);
+            const isSelected = rank > -1;
+            return (
+              <button
                 key={interest}
-                label={interest}
-                selected={data.interests.includes(interest)}
                 onClick={() => toggleInterest(interest)}
-              />
-            ))}
-          </div>
-          {data.interests.length > 0 && (
-            <p style={{
-              fontSize: '13px',
-              color: '#555',
-              marginTop: '12px',
-            }}>
-              {data.interests.length} selected
-            </p>
-          )}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  borderRadius: '24px',
+                  border: `1px solid ${isSelected ? theme.colors.primary : theme.colors.borderLight}`,
+                  backgroundColor: '#fff',
+                  color: theme.colors.textDark,
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {isSelected && (
+                  <span style={{
+                    width: '22px',
+                    height: '22px',
+                    borderRadius: '50%',
+                    backgroundColor: theme.colors.primary,
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    {rank + 1}
+                  </span>
+                )}
+                {interest}
+              </button>
+            );
+          })}
         </div>
       }
     />

@@ -221,8 +221,8 @@ function AppContent() {
       case 0: return !!userData.termsAccepted;
       case 1: return userData.firstName && userData.surname && userData.profession && userData.age >= 18 && !!userData.location;
       case 2: return !!userData.focus;
-      case 3: return !!(userData.headline || userData.statement);
-      case 4: return !!userData.primaryGoal;
+      case 3: return !!userData.primaryGoal;
+      case 4: return !!(userData.headline || userData.statement);
       case 5: return true;
       case 6: return userData.interests.length >= 3;
       case 7: return !!userData.commitmentLevel;
@@ -407,8 +407,8 @@ function AppContent() {
     <TermsScreen key="terms" data={userData} update={updateUserData} />,
     <IntroducingScreen key="intro" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <FocusScreen key="focus" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
-    <HeadlineScreen key="headline" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <GoalsPrimaryScreen key="goals" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
+    <HeadlineScreen key="headline" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <PerspectiveScreen key="perspective" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} onHideNav={setHideFloatingNav} />,
     <InterestsScreen key="interests" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <CommitmentScreen key="commitment" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
