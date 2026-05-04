@@ -1,33 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { theme } from '../theme';
 import BridgeLogo from '../components/BridgeLogo';
-import { eventsAPI, friendsAPI, collectionsAPI, groupSettingsAPI } from '../services/api';
+import { friendsAPI, collectionsAPI, groupSettingsAPI } from '../services/api';
 
 function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCalendar, onGroupInfo }) {
-  const [events, setEvents] = useState([]);
   const [friends, setFriends] = useState([]);
   const [activeGoal, setActiveGoal] = useState(null);
   const [editingGroupName, setEditingGroupName] = useState(false);
   const [groupNameDraft, setGroupNameDraft] = useState('');
   const groupNameInputRef = useRef(null);
-
-  const today = new Date();
-  const currentMonth = today.toLocaleString('default', { month: 'long' });
-  const currentYear = today.getFullYear();
-  const currentDay = today.getDay(); // 0=Sun
-  const currentDate = today.getDate();
-
-  // Get the week's dates (Sun-Sat)
-  const weekDates = [];
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - currentDay);
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    weekDates.push(d.getDate());
-  }
-
-  const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   useEffect(() => {
     loadData();
@@ -37,11 +18,7 @@ function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCa
   const loadData = async () => {
     try {
       if (groupData?.group_id) {
-        const [eventsData, goalsData] = await Promise.all([
-          eventsAPI.getEvents(groupData.group_id).catch(() => []),
-          collectionsAPI.getGoals(groupData.group_id).catch(() => []),
-        ]);
-        setEvents(Array.isArray(eventsData) ? eventsData : []);
+        const goalsData = await collectionsAPI.getGoals(groupData.group_id).catch(() => []);
         if (Array.isArray(goalsData) && goalsData.length > 0) {
           const active = goalsData.find(g => g.status === 'active') || goalsData[0];
           setActiveGoal(active);
@@ -78,22 +55,10 @@ function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCa
     setEditingGroupName(false);
   };
 
-  const formatEventTime = (event) => {
-    if (!event.event_date) return '';
-    try {
-      const d = new Date(event.event_date);
-      return d.toLocaleTimeString('default', { hour: 'numeric', minute: '2-digit' });
-    } catch {
-      return '';
-    }
-  };
-
-  const eventColors = ['#4A90D9', '#E67E22', '#27AE60', '#8E44AD', '#E74C3C'];
-
   return (
     <div style={{
       minHeight: '100vh',
-      background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
+      backgroundColor: '#F4F6F8',
       padding: '20px var(--app-padding, 16px) 90px',
     }}>
       <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto' }}>
@@ -103,9 +68,9 @@ function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCa
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '24px',
+          marginBottom: '20px',
         }}>
-          <BridgeLogo />
+          <BridgeLogo size="small" />
           <button onClick={onProfile} style={{
             width: '36px', height: '36px', borderRadius: '50%',
             background: 'transparent', border: 'none', cursor: 'pointer',
@@ -120,66 +85,74 @@ function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCa
         </div>
 
         {/* Profile Card */}
-        <div style={{
-          backgroundColor: theme.colors.surfaceWhite,
-          borderRadius: '16px',
-          padding: '20px',
-          marginBottom: '16px',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            {userData.profilePhoto ? (
-              <img
-                src={userData.profilePhoto}
-                alt={userData.firstName}
-                style={{
-                  width: '56px', height: '56px', borderRadius: '50%',
-                  objectFit: 'cover',
-                }}
-              />
-            ) : (
-              <div style={{
+        <div
+          onClick={onProfile}
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: '20px',
+            padding: '16px',
+            marginBottom: '16px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            cursor: 'pointer',
+          }}
+        >
+          {userData.profilePhoto ? (
+            <img
+              src={userData.profilePhoto}
+              alt={userData.firstName}
+              style={{
                 width: '56px', height: '56px', borderRadius: '50%',
-                backgroundColor: theme.colors.primary, color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '22px', fontWeight: '600',
-                flexShrink: 0,
-              }}>
-                {(userData.firstName || 'U')[0]}
-              </div>
-            )}
-            <div style={{ minWidth: 0 }}>
-              <h2 style={{
-                fontSize: '20px', fontWeight: '700',
-                color: theme.colors.textDark, margin: 0,
-              }}>
-                {userData.firstName} {userData.surname}
-              </h2>
+                objectFit: 'cover', flexShrink: 0,
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '56px', height: '56px', borderRadius: '50%',
+              backgroundColor: theme.colors.primary, color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '22px', fontWeight: '700', flexShrink: 0,
+            }}>
+              {(userData.firstName || 'U')[0]}
+            </div>
+          )}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h2 style={{
+              fontSize: '20px', fontWeight: '700',
+              color: theme.colors.textDark, margin: 0,
+              lineHeight: '1.2',
+            }}>
+              {userData.firstName} {userData.surname}
+            </h2>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              marginTop: '6px', flexWrap: 'wrap',
+            }}>
               {userData.location && (
-                <p style={{
-                  fontSize: '13px', color: theme.colors.textMedium,
-                  margin: '2px 0 0',
-                }}>
+                <span style={{ fontSize: '13px', color: theme.colors.textMedium }}>
                   {userData.location}
-                </p>
+                </span>
               )}
-              <span style={{
-                display: 'inline-block', fontSize: '11px', padding: '3px 10px',
-                backgroundColor: 'rgba(45, 79, 92, 0.1)', borderRadius: '10px',
-                color: theme.colors.primary, fontWeight: '600', marginTop: '6px',
-              }}>
-                {userData.focus || 'Portfolio builder'}
-              </span>
+              {userData.focus && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '5px',
+                  fontSize: '12px', padding: '4px 10px',
+                  border: `1px solid ${theme.colors.borderLight}`,
+                  borderRadius: '14px',
+                  color: theme.colors.textDark, fontWeight: '500',
+                  backgroundColor: '#fff',
+                }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  {userData.focus}
+                </span>
+              )}
             </div>
           </div>
-          {userData.headline && (
-            <p style={{
-              fontSize: '13px', color: theme.colors.textMedium,
-              marginTop: '14px', marginBottom: 0, lineHeight: '1.5',
-            }}>
-              {userData.headline}
-            </p>
-          )}
         </div>
 
         {/* Group Card */}
@@ -187,87 +160,78 @@ function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCa
           <div
             onClick={onChat}
             style={{
-              backgroundColor: theme.colors.surfaceWhite,
-              borderRadius: '16px',
-              padding: '20px',
-              marginBottom: '16px',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+              background: 'linear-gradient(135deg, #DCE5EC 0%, #C7D5DF 100%)',
+              borderRadius: '20px',
+              padding: '18px',
+              marginBottom: '24px',
               cursor: 'pointer',
             }}
           >
-            <h3 style={{
-              fontSize: '18px', fontWeight: '700',
-              color: theme.colors.textDark, margin: '0 0 12px',
-            }}>
-              Group
-            </h3>
-
-            {/* Group name bordered card */}
             <div style={{
-              border: `1px solid ${theme.colors.borderLight}`,
-              borderRadius: '12px',
-              padding: '12px 14px',
-              marginBottom: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              marginBottom: '14px',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.primary} style={{ flexShrink: 0 }}>
-                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                </svg>
-                {editingGroupName ? (
-                  <input
-                    ref={groupNameInputRef}
-                    value={groupNameDraft}
-                    onChange={e => setGroupNameDraft(e.target.value)}
-                    onBlur={saveGroupName}
-                    onKeyDown={e => { if (e.key === 'Enter') saveGroupName(); if (e.key === 'Escape') setEditingGroupName(false); }}
-                    onClick={e => e.stopPropagation()}
-                    style={{
-                      fontSize: '15px', fontWeight: '600',
-                      color: theme.colors.textDark,
-                      border: `1px solid ${theme.colors.primary}`,
-                      borderRadius: '8px', padding: '4px 8px',
-                      outline: 'none', flex: 1, minWidth: 0,
-                    }}
-                  />
-                ) : (
-                  <span
-                    onClick={startEditGroupName}
-                    style={{
-                      fontSize: '15px', fontWeight: '600',
-                      color: theme.colors.textDark, cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                    }}
-                  >
-                    {groupData.group_name || 'My Group'}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.colors.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                  </span>
-                )}
-              </div>
-              <span style={{
-                fontSize: '12px', color: theme.colors.textLight,
-                fontWeight: '500',
+              {editingGroupName ? (
+                <input
+                  ref={groupNameInputRef}
+                  value={groupNameDraft}
+                  onChange={e => setGroupNameDraft(e.target.value)}
+                  onBlur={saveGroupName}
+                  onKeyDown={e => { if (e.key === 'Enter') saveGroupName(); if (e.key === 'Escape') setEditingGroupName(false); }}
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    fontSize: '17px', fontWeight: '700',
+                    color: theme.colors.textDark,
+                    border: `1px solid ${theme.colors.primary}`,
+                    borderRadius: '8px', padding: '4px 8px',
+                    outline: 'none', flex: 1, minWidth: 0,
+                    backgroundColor: '#fff',
+                  }}
+                />
+              ) : (
+                <h3
+                  onClick={startEditGroupName}
+                  style={{
+                    fontSize: '17px', fontWeight: '700',
+                    color: theme.colors.textDark, margin: 0,
+                    cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  }}
+                >
+                  {groupData.group_name || 'My Group'}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.colors.textLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </h3>
+              )}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                fontSize: '13px', color: theme.colors.textDark, fontWeight: '500',
               }}>
-                {groupData.weeks || ''} Weeks
-              </span>
+                <svg width="18" height="14" viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v3" />
+                  <path d="M5.5 5l1.5 2" />
+                  <path d="M18.5 5l-1.5 2" />
+                  <path d="M3 13a9 9 0 0 1 18 0" />
+                  <path d="M1 17h22" />
+                </svg>
+                <span>Weeks</span>
+              </div>
             </div>
 
             {/* Member avatars */}
-            <div style={{ display: 'flex', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', marginBottom: '14px' }}>
               {members.map((member, i) => (
                 <div key={member.user_id || i} style={{
-                  width: '34px', height: '34px', borderRadius: '50%',
+                  width: '46px', height: '46px', borderRadius: '50%',
                   backgroundColor: theme.colors.primary,
                   color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '13px', fontWeight: '600', border: '2px solid #fff',
-                  marginLeft: i > 0 ? '-10px' : '0',
+                  fontSize: '15px', fontWeight: '600',
+                  border: '3px solid #fff',
+                  marginLeft: i > 0 ? '-12px' : '0',
                   zIndex: members.length - i,
                   overflow: 'hidden',
+                  flexShrink: 0,
                 }}>
                   {member.profile_photo_url ? (
                     <img src={member.profile_photo_url} alt="" style={{
@@ -280,205 +244,106 @@ function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCa
               ))}
             </div>
 
-            {/* Active goal tag */}
-            {activeGoal && (
-              <div style={{
-                display: 'inline-block',
-                fontSize: '12px', padding: '5px 12px',
-                backgroundColor: 'rgba(45, 79, 92, 0.08)',
-                borderRadius: '10px',
-                color: theme.colors.primary, fontWeight: '500',
-              }}>
-                {activeGoal.title || 'each person ships 1 portfolio piece'}
-              </div>
-            )}
+            {/* Active goal pill */}
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              fontSize: '13px', padding: '8px 14px',
+              backgroundColor: 'rgba(116, 153, 182, 0.25)',
+              borderRadius: '14px',
+              color: theme.colors.textDark, fontWeight: '500',
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+              </svg>
+              {activeGoal?.title || 'each person ships 1 portfolio piece'}
+            </div>
           </div>
         )}
 
-        {/* Calendar Section */}
-        <div
-          onClick={onCalendar}
-          style={{
-            backgroundColor: theme.colors.surfaceWhite,
-            borderRadius: '16px',
-            padding: '20px',
-            marginBottom: '16px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-          }}
-        >
-          {/* Calendar header */}
-          <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            alignItems: 'center', marginBottom: '16px',
-          }}>
-            <h3 style={{
-              fontSize: '18px', fontWeight: '700',
-              color: theme.colors.textDark, margin: 0,
-              cursor: 'pointer',
-            }}>
-              Calendar{' '}
-              <span style={{ fontSize: '16px', color: theme.colors.textLight }}>{'>'}</span>
-            </h3>
-            <span style={{
-              fontSize: '13px', color: theme.colors.textMedium, fontWeight: '500',
-            }}>
-              {currentMonth} {currentYear}
-            </span>
-          </div>
-
-          {/* Week days row */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
-            textAlign: 'center', marginBottom: '8px',
-          }}>
-            {dayLabels.map((label, i) => (
-              <span key={i} style={{
-                fontSize: '12px', color: theme.colors.textLight,
-                fontWeight: '600',
-              }}>
-                {label}
-              </span>
-            ))}
-          </div>
-
-          {/* Week dates row */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
-            textAlign: 'center', marginBottom: '16px',
-          }}>
-            {weekDates.map((date, i) => {
-              const isToday = date === currentDate;
-              return (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: '6px 0',
-                }}>
-                  <span style={{
-                    width: '30px', height: '30px', borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '14px', fontWeight: isToday ? '700' : '500',
-                    backgroundColor: isToday ? theme.colors.primary : 'transparent',
-                    color: isToday ? '#fff' : theme.colors.textDark,
-                  }}>
-                    {date}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Events list */}
-          {events.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {events.slice(0, 4).map((event, i) => (
-                <div key={event.event_id || i} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: '10px',
-                }}>
-                  <div style={{
-                    width: '8px', height: '8px', borderRadius: '50%',
-                    backgroundColor: eventColors[i % eventColors.length],
-                    marginTop: '5px', flexShrink: 0,
-                  }} />
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <p style={{
-                      fontSize: '14px', fontWeight: '600',
-                      color: theme.colors.textDark, margin: 0,
-                    }}>
-                      {event.title}
-                    </p>
-                    <p style={{
-                      fontSize: '12px', color: theme.colors.textLight,
-                      margin: '2px 0 0',
-                    }}>
-                      {formatEventTime(event)}
-                      {event.location ? ` \u00B7 ${event.location}` : ''}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p style={{
-              fontSize: '13px', color: theme.colors.textLight,
-              margin: 0, textAlign: 'center',
-            }}>
-              No upcoming events
-            </p>
-          )}
-        </div>
-
         {/* Friends Section */}
-        {friends.length > 0 && (
-          <div style={{
-            backgroundColor: theme.colors.surfaceWhite,
-            borderRadius: '16px',
-            padding: '20px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-          }}>
-            <h3 style={{
-              fontSize: '18px', fontWeight: '700',
-              color: theme.colors.textDark, margin: '0 0 14px',
-            }}>
-              Friends
-            </h3>
+        <h3 style={{
+          fontSize: '17px', fontWeight: '700',
+          color: theme.colors.textDark, margin: '0 0 12px',
+        }}>
+          Friends
+        </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {friends.map((friend, i) => (
-                <div key={friend.friend_id || friend.user_id || i} style={{
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  padding: '10px',
-                  backgroundColor: 'rgba(45, 79, 92, 0.03)',
-                  borderRadius: '12px',
-                }}>
-                  {friend.profile_photo ? (
-                    <img
-                      src={friend.profile_photo}
-                      alt={friend.first_name}
-                      style={{
-                        width: '42px', height: '42px', borderRadius: '50%',
-                        objectFit: 'cover', flexShrink: 0,
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '42px', height: '42px', borderRadius: '50%',
-                      backgroundColor: theme.colors.primary, color: '#fff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '16px', fontWeight: '600', flexShrink: 0,
-                    }}>
-                      {(friend.first_name || 'U')[0]}
-                    </div>
-                  )}
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <p style={{
-                      fontSize: '15px', fontWeight: '600',
-                      color: theme.colors.textDark, margin: 0,
-                    }}>
-                      {friend.first_name} {friend.surname || friend.last_name || ''}
-                    </p>
+        {friends.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+            {friends.map((friend, i) => (
+              <div key={friend.friend_id || friend.user_id || i} style={{
+                display: 'flex', alignItems: 'center', gap: '12px',
+                padding: '12px',
+                backgroundColor: '#fff',
+                borderRadius: '14px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              }}>
+                {friend.profile_photo ? (
+                  <img
+                    src={friend.profile_photo}
+                    alt={friend.first_name}
+                    style={{
+                      width: '44px', height: '44px', borderRadius: '50%',
+                      objectFit: 'cover', flexShrink: 0,
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '44px', height: '44px', borderRadius: '50%',
+                    backgroundColor: theme.colors.primary, color: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '16px', fontWeight: '600', flexShrink: 0,
+                  }}>
+                    {(friend.first_name || 'U')[0]}
+                  </div>
+                )}
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <p style={{
+                    fontSize: '15px', fontWeight: '600',
+                    color: theme.colors.textDark, margin: 0,
+                  }}>
+                    {friend.first_name} {friend.surname || friend.last_name || ''}
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
                     {friend.location && (
-                      <p style={{
-                        fontSize: '12px', color: theme.colors.textMedium,
-                        margin: '2px 0 0',
-                      }}>
+                      <span style={{ fontSize: '12px', color: theme.colors.textMedium }}>
                         {friend.location}
-                      </p>
+                      </span>
                     )}
                     {friend.focus && (
                       <span style={{
-                        display: 'inline-block', fontSize: '10px', padding: '2px 8px',
-                        backgroundColor: 'rgba(45, 79, 92, 0.1)', borderRadius: '8px',
-                        color: theme.colors.primary, fontWeight: '500', marginTop: '4px',
+                        display: 'inline-block', fontSize: '11px', padding: '3px 9px',
+                        border: `1px solid ${theme.colors.borderLight}`,
+                        borderRadius: '12px',
+                        color: theme.colors.textDark, fontWeight: '500',
                       }}>
                         {friend.focus}
                       </span>
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
+        ) : (
+          <p style={{
+            fontSize: '13px', color: theme.colors.textLight,
+            margin: '0 0 24px', textAlign: 'center',
+          }}>
+            No friends yet
+          </p>
         )}
+
+        {/* Groups Section */}
+        <h3 style={{
+          fontSize: '17px', fontWeight: '700',
+          color: theme.colors.textDark, margin: '0 0 12px',
+        }}>
+          Groups
+        </h3>
+        {/* Empty placeholder for now */}
       </div>
     </div>
   );
