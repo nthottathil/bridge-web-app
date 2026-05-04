@@ -254,7 +254,6 @@ function AppContent() {
           onLogout={handleLogout}
           onReplayOnboarding={() => {
             setShowProfile(false);
-            setUserData(prev => ({ ...EMPTY_USER_DATA, id: prev.id, email: prev.email }));
             setCurrentStep(0);
           }}
         />
