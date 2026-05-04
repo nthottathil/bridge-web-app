@@ -5,7 +5,6 @@ import SignupScreen from './screens/SignupScreen';
 import TermsScreen from './screens/TermsScreen';
 import MockVerificationScreen from './screens/MockVerificationScreen';
 import IntroducingScreen from './screens/IntroducingScreen';
-import LocationScreen from './screens/LocationScreen';
 import FocusScreen from './screens/FocusScreen';
 import HeadlineScreen from './screens/HeadlineScreen';
 import GoalsPrimaryScreen from './screens/GoalsPrimaryScreen';
@@ -25,15 +24,15 @@ import { FloatingNav, NavButton, BottomNav } from './components';
 import { authAPI, groupsAPI } from './services/api';
 
 /*
-  Onboarding flow (10 steps):
+  Onboarding flow (9 steps):
   0 Terms (Bridge Code)
-  Tab 0 - Identity:    1 Introducing | 2 Location | 3 Focus | 4 Headline
-  Tab 1 - Direction:   5 Goals       | 6 Perspective
-  Tab 2 - Vibe:        7 Interests
-  Tab 3 - Commitment:  8 Commitment  | 9 DealBreakers
+  Tab 0 - Identity:    1 Introducing (incl location) | 2 Focus | 3 Headline
+  Tab 1 - Direction:   4 Goals       | 5 Perspective
+  Tab 2 - Vibe:        6 Interests
+  Tab 3 - Commitment:  7 Commitment  | 8 DealBreakers
 */
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 const EMPTY_USER_DATA = {
   firstName: '',
@@ -220,15 +219,14 @@ function AppContent() {
     switch (step) {
       case -1: return true; // mock verification (replay only)
       case 0: return !!userData.termsAccepted;
-      case 1: return userData.firstName && userData.surname && userData.profession && userData.age >= 18;
-      case 2: return !!userData.location;
-      case 3: return !!userData.focus;
-      case 4: return !!(userData.headline || userData.statement);
-      case 5: return !!userData.primaryGoal;
-      case 6: return true;
-      case 7: return userData.interests.length >= 3;
-      case 8: return !!userData.commitmentLevel;
-      case 9: return true;
+      case 1: return userData.firstName && userData.surname && userData.profession && userData.age >= 18 && !!userData.location;
+      case 2: return !!userData.focus;
+      case 3: return !!(userData.headline || userData.statement);
+      case 4: return !!userData.primaryGoal;
+      case 5: return true;
+      case 6: return userData.interests.length >= 3;
+      case 7: return !!userData.commitmentLevel;
+      case 8: return true;
       default: return true;
     }
   };
@@ -408,7 +406,6 @@ function AppContent() {
     ...(replayMode ? [<MockVerificationScreen key="verify" />] : []),
     <TermsScreen key="terms" data={userData} update={updateUserData} />,
     <IntroducingScreen key="intro" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
-    <LocationScreen key="location" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <FocusScreen key="focus" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <HeadlineScreen key="headline" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <GoalsPrimaryScreen key="goals" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
