@@ -146,3 +146,32 @@ def admin_add_member(group_id: int, email: str, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": f"{user.first_name or user.email} added to group {group_id}"}
+
+
+@router.get("/user-profile")
+def admin_get_user_profile(email: str, db: Session = Depends(get_db)):
+    """Inspect a user's full profile by email."""
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "id": user.id,
+        "email": user.email,
+        "first_name": user.first_name,
+        "surname": user.surname,
+        "age": user.age,
+        "profession": user.profession,
+        "primary_goal": user.primary_goal,
+        "interests": user.interests,
+        "personality": user.personality,
+        "statement": user.statement,
+        "location": user.location,
+        "max_distance": user.max_distance,
+        "gender": user.gender,
+        "focus": user.focus,
+        "headline": user.headline,
+        "commitment_level": user.commitment_level,
+        "deal_breakers": user.deal_breakers,
+        "perspective_answers": user.perspective_answers,
+        "country": user.country,
+    }
