@@ -582,43 +582,40 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
               No perspective answers yet
             </p>
           )}
-        </div>
 
-        {/* Interests + Deal breakers */}
-        {((profile.interests && profile.interests.length > 0) || (profile.deal_breakers && profile.deal_breakers.length > 0)) && (
-          <div style={{
-            background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
-            borderRadius: '20px',
-            margin: '0 16px 14px',
-            padding: '20px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-          }}>
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-            }}>
-              {(profile.interests || []).map(interest => (
-                <span key={interest} style={{
-                  padding: '6px 14px', borderRadius: '20px',
-                  border: '1px solid #ccc',
-                  color: theme.colors.textDark, fontSize: '13px', fontWeight: '500',
-                }}>
-                  {interest}
-                </span>
-              ))}
-              {(profile.deal_breakers || []).map(db => (
-                <span key={db} style={{
-                  padding: '6px 14px', borderRadius: '20px',
-                  border: '1px solid #ccc',
-                  color: theme.colors.textDark, fontSize: '13px', fontWeight: '500',
-                }}>
-                  {db}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+          {/* Interests + Deal breakers — inside the perspective card */}
+          {((profile.interests && profile.interests.length > 0) || (profile.deal_breakers && profile.deal_breakers.length > 0)) && (
+            <>
+              <div style={{ borderTop: '1px solid rgba(0,0,0,0.12)', margin: '18px 0' }} />
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px',
+              }}>
+                {(profile.interests || []).map(interest => (
+                  <span key={interest} style={{
+                    padding: '6px 14px', borderRadius: '20px',
+                    backgroundColor: '#e2e6ea',
+                    border: '1px solid #d0d4d8',
+                    color: theme.colors.textDark, fontSize: '13px', fontWeight: '500',
+                  }}>
+                    {interest}
+                  </span>
+                ))}
+                {(profile.deal_breakers || []).map(db => (
+                  <span key={db} style={{
+                    padding: '6px 14px', borderRadius: '20px',
+                    backgroundColor: '#e2e6ea',
+                    border: '1px solid #d0d4d8',
+                    color: theme.colors.textDark, fontSize: '13px', fontWeight: '500',
+                  }}>
+                    {db}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Log Out */}
         <button onClick={onLogout} style={{
