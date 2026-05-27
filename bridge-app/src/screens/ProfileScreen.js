@@ -502,7 +502,7 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
 
         {/* Goal + Perspective combined card */}
         <div style={{
-          backgroundColor: '#fff',
+          background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
           borderRadius: '20px',
           margin: '14px 16px',
           padding: '20px',
@@ -587,7 +587,7 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
         {/* Interests + Deal breakers */}
         {((profile.interests && profile.interests.length > 0) || (profile.deal_breakers && profile.deal_breakers.length > 0)) && (
           <div style={{
-            backgroundColor: '#fff',
+            background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
             borderRadius: '20px',
             margin: '0 16px 14px',
             padding: '20px',
