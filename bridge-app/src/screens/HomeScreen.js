@@ -158,7 +158,7 @@ function HomeScreen({ userData, groupData, setGroupData, onProfile, onChat, onCa
         {/* Group Card */}
         {groupData && (
           <div
-            onClick={onChat}
+            onClick={onGroupInfo}
             style={{
               background: 'linear-gradient(135deg, #DCE5EC 0%, #C7D5DF 100%)',
               borderRadius: '20px',
