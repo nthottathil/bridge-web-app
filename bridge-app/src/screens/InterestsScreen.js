@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SplitLayout } from '../components';
 import { theme } from '../theme';
 
@@ -9,9 +9,20 @@ const ALL_INTERESTS = [
 ];
 
 const MAX_SELECTIONS = 5;
+const VALID_SET = new Set(ALL_INTERESTS);
 
 function InterestsScreen({ data, update }) {
   const interests = data.interests || [];
+
+  // Drop any stored interests that aren't in the current canonical list
+  // (e.g. leftovers from older app versions with different category names).
+  useEffect(() => {
+    const cleaned = interests.filter(i => VALID_SET.has(i));
+    if (cleaned.length !== interests.length) {
+      update('interests', cleaned);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleInterest = (interest) => {
     const current = [...interests];
