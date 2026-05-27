@@ -177,7 +177,7 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
     return (
       <div style={{
         minHeight: '100vh',
-        background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
+        background: '#f5f7fa',
       }}>
         {/* Header */}
         <div style={{
@@ -372,44 +372,61 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
   return (
     <div style={{
       minHeight: '100vh',
-      background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
+      background: '#f5f7fa',
     }}>
-      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto', paddingTop: '16px' }}>
+      <div style={{ maxWidth: 'var(--app-max-width, 100%)', margin: '0 auto', paddingTop: '12px' }}>
+        {/* Top bar: Back to Home + Bridge logo */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '4px 16px 12px',
+        }}>
+          <button onClick={onBack} style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '8px 14px', borderRadius: '20px',
+            backgroundColor: '#fff',
+            border: `1px solid ${theme.colors.borderLight}`,
+            color: theme.colors.textDark, cursor: 'pointer',
+            fontSize: '13px', fontWeight: '500',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
+            Home
+          </button>
+          <BridgeLogo />
+        </div>
+
         {/* Profile hero card */}
         <div style={{
-          backgroundColor: theme.colors.surfaceCard,
+          backgroundColor: '#fff',
           borderRadius: '20px',
           margin: '0 16px',
           padding: '24px 20px 20px',
-          backdropFilter: 'blur(10px)',
           position: 'relative',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}>
-          {/* Top row: logo + arrow */}
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            marginBottom: '16px',
+          {/* Edit pencil — top right of card */}
+          <button onClick={() => setEditing(true)} aria-label="Edit profile" style={{
+            position: 'absolute', top: '14px', right: '14px',
+            width: '32px', height: '32px', borderRadius: '50%',
+            backgroundColor: 'transparent', border: 'none',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <BridgeLogo />
-            <button onClick={onBack} style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: 'none', border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
-                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
-              </svg>
-            </button>
-          </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+          </button>
 
           {/* Profile photo */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', position: 'relative' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
             <div
               onClick={() => fileInputRef.current?.click()}
               style={{
                 width: '140px', height: '160px', borderRadius: '16px',
                 backgroundColor: '#e8e8e8', overflow: 'hidden', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
               }}
             >
               {profile.profile_photo_url ? (
@@ -428,17 +445,6 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
             </div>
             <input ref={fileInputRef} type="file" accept="image/*"
               onChange={handlePhotoSelect} style={{ display: 'none' }} />
-            {/* Edit pencil */}
-            <button onClick={() => setEditing(true)} style={{
-              position: 'absolute', bottom: '0', right: '20%',
-              width: '32px', height: '32px', borderRadius: '50%',
-              backgroundColor: 'transparent', border: 'none',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
-                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-              </svg>
-            </button>
           </div>
 
           {/* Name */}
@@ -496,12 +502,24 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
 
         {/* Goal + Perspective combined card */}
         <div style={{
-          backgroundColor: theme.colors.surfaceCard,
+          backgroundColor: '#fff',
           borderRadius: '20px',
           margin: '14px 16px',
           padding: '20px',
-          backdropFilter: 'blur(10px)',
+          position: 'relative',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}>
+          <button onClick={() => setEditing(true)} aria-label="Edit goal & perspective" style={{
+            position: 'absolute', top: '14px', right: '14px',
+            width: '32px', height: '32px', borderRadius: '50%',
+            backgroundColor: 'transparent', border: 'none',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+          </button>
+
           {/* Goal section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill={theme.colors.primary}>
@@ -569,15 +587,13 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
         {/* Interests + Deal breakers */}
         {((profile.interests && profile.interests.length > 0) || (profile.deal_breakers && profile.deal_breakers.length > 0)) && (
           <div style={{
-            backgroundColor: theme.colors.surfaceCard,
+            backgroundColor: '#fff',
             borderRadius: '20px',
             margin: '0 16px 14px',
             padding: '20px',
-            backdropFilter: 'blur(10px)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
           }}>
             <div style={{
-              borderTop: '1px solid #e8e8e8',
-              paddingTop: '16px',
               display: 'flex',
               flexWrap: 'wrap',
               gap: '8px',
@@ -624,9 +640,10 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
 function EditSection({ title, children }) {
   return (
     <div style={{
-      backgroundColor: theme.colors.surfaceCard,
+      backgroundColor: '#fff',
       borderRadius: '16px', padding: '18px',
-      marginBottom: '14px', backdropFilter: 'blur(10px)',
+      marginBottom: '14px',
+      boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
     }}>
       <h3 style={{
         fontSize: '15px', fontWeight: '600', color: theme.colors.textDark,
