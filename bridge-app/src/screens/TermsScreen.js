@@ -93,10 +93,17 @@ function TermsScreen({ data, update }) {
             <button
               onClick={() => setShowFullTerms(true)}
               style={{
-                background: 'none', border: 'none', padding: '8px 0',
+                width: '100%',
+                backgroundColor: '#fff',
+                border: 'none',
+                borderRadius: '14px',
+                padding: '16px 20px',
+                marginBottom: '12px',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                 color: theme.colors.textDark, fontSize: '13px',
                 cursor: 'pointer', textDecoration: 'underline',
-                marginBottom: '16px', display: 'block',
+                textAlign: 'left',
+                fontFamily: 'inherit',
               }}
             >
               Click here to read Terms &amp; Conditions before accept.
@@ -104,7 +111,11 @@ function TermsScreen({ data, update }) {
 
             <label style={{
               display: 'flex', alignItems: 'center', gap: '10px',
-              cursor: 'pointer', padding: '8px 0',
+              cursor: 'pointer',
+              backgroundColor: '#fff',
+              borderRadius: '14px',
+              padding: '16px 20px',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
             }}>
               <input
                 type="checkbox"
