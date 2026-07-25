@@ -22,22 +22,6 @@ function GoalModal({ onClose, onCreate }) {
   );
 }
 
-function AskModal({ onClose, onCreate }) {
-  const [question, setQuestion] = useState('');
-  return (
-    <div style={modalOverlay}>
-      <div style={modalBox}>
-        <h3 style={modalTitle}>Ask the group</h3>
-        <textarea placeholder="Your question..." value={question} onChange={e => setQuestion(e.target.value)} rows={3} style={{ ...modalInput, resize: 'vertical', fontFamily: 'inherit' }} />
-        <div style={modalActions}>
-          <button onClick={onClose} style={modalCancelBtn}>Cancel</button>
-          <button disabled={!question.trim()} onClick={() => onCreate(question.trim())} style={{ ...modalCreateBtn, opacity: question.trim() ? 1 : 0.5 }}>Create</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function PollModal({ onClose, onCreate }) {
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
@@ -58,25 +42,6 @@ function PollModal({ onClose, onCreate }) {
         <div style={modalActions}>
           <button onClick={onClose} style={modalCancelBtn}>Cancel</button>
           <button disabled={!canCreate} onClick={() => onCreate(question.trim(), options.filter(o => o.trim()))} style={{ ...modalCreateBtn, opacity: canCreate ? 1 : 0.5 }}>Create</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function NoteModal({ onClose, onCreate }) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const canCreate = title.trim();
-  return (
-    <div style={modalOverlay}>
-      <div style={modalBox}>
-        <h3 style={modalTitle}>Note</h3>
-        <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} style={modalInput} />
-        <textarea placeholder="Content..." value={content} onChange={e => setContent(e.target.value)} rows={3} style={{ ...modalInput, marginTop: '8px', resize: 'vertical', fontFamily: 'inherit' }} />
-        <div style={modalActions}>
-          <button onClick={onClose} style={modalCancelBtn}>Cancel</button>
-          <button disabled={!canCreate} onClick={() => onCreate({ title: title.trim(), content: content.trim() })} style={{ ...modalCreateBtn, opacity: canCreate ? 1 : 0.5 }}>Create note</button>
         </div>
       </div>
     </div>
@@ -449,19 +414,10 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
     try { await collectionsAPI.createGoal(groupData.group_id, title); setActiveModal(null); await loadMessages(); }
     catch (err) { console.error('Error creating goal:', err); }
   };
-  const handleCreateAsk = async (question) => {
-    try { await collectionsAPI.createAsk(groupData.group_id, question); setActiveModal(null); await loadMessages(); }
-    catch (err) { console.error('Error creating ask:', err); }
-  };
   const handleCreatePoll = async (question, options) => {
     try { await collectionsAPI.createPoll(groupData.group_id, question, options); setActiveModal(null); await loadMessages(); }
     catch (err) { console.error('Error creating poll:', err); }
   };
-  const handleCreateNote = async ({ title, content }) => {
-    try { await collectionsAPI.createNote({ group_id: groupData.group_id, title, content }); setActiveModal(null); await loadMessages(); }
-    catch (err) { console.error('Error creating note:', err); }
-  };
-
   const openModal = (type) => { setShowPlusMenu(false); setActiveModal(type); };
 
   /* --- group messages by sender for consecutive runs --- */
@@ -610,21 +566,6 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
           {groupData?.name || 'Your Bridge Group'}
         </span>
 
-        <button style={{
-          padding: '5px 12px', borderRadius: '20px',
-          border: '1.5px solid rgba(255,255,255,0.5)', backgroundColor: 'transparent',
-          color: '#fff', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-          flexShrink: 0,
-        }}>
-          Meetup
-        </button>
-
-        <button style={headerIconBtn} aria-label="Call">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-          </svg>
-        </button>
-
         <button onClick={onGroupInfo} style={headerIconBtn} aria-label="Group info">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="6" x2="21" y2="6"/>
@@ -752,9 +693,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
             }}>
               {[
                 { label: 'Goal of the week', key: 'goal' },
-                { label: 'Ask the group', key: 'ask' },
                 { label: 'Poll', key: 'poll' },
-                { label: 'Note', key: 'note' },
               ].map(item => (
                 <button key={item.key} onClick={() => openModal(item.key)} style={{
                   display: 'block', width: '100%', textAlign: 'left',
@@ -774,9 +713,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
 
       {/* ─── Creation Modals ─── */}
       {activeModal === 'goal' && <GoalModal onClose={() => setActiveModal(null)} onCreate={handleCreateGoal} />}
-      {activeModal === 'ask' && <AskModal onClose={() => setActiveModal(null)} onCreate={handleCreateAsk} />}
       {activeModal === 'poll' && <PollModal onClose={() => setActiveModal(null)} onCreate={handleCreatePoll} />}
-      {activeModal === 'note' && <NoteModal onClose={() => setActiveModal(null)} onCreate={handleCreateNote} />}
     </div>
   );
 }
