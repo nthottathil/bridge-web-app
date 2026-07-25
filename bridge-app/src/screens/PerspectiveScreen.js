@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SplitLayout } from '../components';
 import { theme } from '../theme';
 
@@ -6,6 +6,7 @@ const CATEGORIES = [
   {
     name: 'Ambition',
     tagline: 'What are you actually about?',
+    blurb: 'What you\'re chasing right now, and what you\'re willing to bet on.',
     questions: [
       'What are you obsessed with right now?',
       'What\'s a bet you\'re making on yourself?',
@@ -15,6 +16,7 @@ const CATEGORIES = [
   {
     name: 'Perspective',
     tagline: 'How do you actually think?',
+    blurb: 'The opinions and ideas you\'ve arrived at yourself.',
     questions: [
       'What\'s a popular opinion you genuinely disagree with?',
       'What\'s something you changed your mind on?',
@@ -24,6 +26,7 @@ const CATEGORIES = [
   {
     name: 'Character',
     tagline: 'What makes you, you?',
+    blurb: 'The quirks your closest friends would recognise you by.',
     questions: [
       'What are you terrible at but love anyway?',
       'What do your closest friends always come to you for?',
@@ -41,6 +44,30 @@ function PerspectiveScreen({ data, update, onHideNav }) {
   const [currentAnswer, setCurrentAnswer] = useState('');
   const answers = data.perspectiveAnswers || {};
   const activeCategoryData = CATEGORIES.find(c => c.name === activeCategory) || CATEGORIES[0];
+
+  // Point the explainer bubble's tail at whichever tab is active.
+  const tabsRef = useRef(null);
+  const tabRefs = useRef({});
+  const [tail, setTail] = useState({ left: 24, show: true });
+
+  useLayoutEffect(() => {
+    const positionTail = () => {
+      const tabs = tabsRef.current;
+      const tab = tabRefs.current[activeCategory];
+      if (!tabs || !tab) return;
+      const tabsBox = tabs.getBoundingClientRect();
+      const tabBox = tab.getBoundingClientRect();
+      setTail({
+        left: tabBox.left + tabBox.width / 2 - tabsBox.left,
+        // Tabs wrap on narrow screens; only show the tail when the active tab
+        // sits on the bottom row, directly above the bubble.
+        show: tabsBox.bottom - tabBox.bottom < 4,
+      });
+    };
+    positionTail();
+    window.addEventListener('resize', positionTail);
+    return () => window.removeEventListener('resize', positionTail);
+  }, [activeCategory]);
 
   // Drop answers to questions that are no longer in the current set, so
   // retired prompts don't linger on the profile.
@@ -176,10 +203,10 @@ function PerspectiveScreen({ data, update, onHideNav }) {
       rightContent={
         <div>
           {/* Category tabs */}
-          <div style={{
+          <div ref={tabsRef} style={{
             display: 'flex',
             gap: '8px',
-            marginBottom: '16px',
+            marginBottom: '10px',
             flexWrap: 'wrap',
           }}>
             {CATEGORIES.map(cat => {
@@ -188,6 +215,7 @@ function PerspectiveScreen({ data, update, onHideNav }) {
               return (
                 <button
                   key={cat.name}
+                  ref={el => { tabRefs.current[cat.name] = el; }}
                   onClick={() => setActiveCategory(cat.name)}
                   style={{
                     padding: '8px 16px',
@@ -215,15 +243,49 @@ function PerspectiveScreen({ data, update, onHideNav }) {
             })}
           </div>
 
-          {/* Category tagline + instruction */}
-          <p style={{
-            fontSize: '15px',
-            fontWeight: '600',
-            color: theme.colors.textDark,
-            marginBottom: '4px',
+          {/* Explainer bubble for the active category */}
+          <div style={{
+            position: 'relative',
+            backgroundColor: theme.colors.surfaceWhite,
+            border: `1px solid ${theme.colors.borderLight}`,
+            borderRadius: '14px',
+            padding: '12px 16px',
+            marginBottom: '18px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           }}>
-            {activeCategoryData.tagline}
-          </p>
+            {tail.show && (
+              <span style={{
+                position: 'absolute',
+                top: '-6px',
+                left: `${tail.left}px`,
+                width: '10px',
+                height: '10px',
+                marginLeft: '-5px',
+                backgroundColor: theme.colors.surfaceWhite,
+                borderLeft: `1px solid ${theme.colors.borderLight}`,
+                borderTop: `1px solid ${theme.colors.borderLight}`,
+                transform: 'rotate(45deg)',
+                transition: 'left 0.2s ease',
+              }} />
+            )}
+            <p style={{
+              fontSize: '15px',
+              fontWeight: '600',
+              color: theme.colors.textDark,
+              margin: '0 0 4px',
+            }}>
+              {activeCategoryData.tagline}
+            </p>
+            <p style={{
+              fontSize: '13px',
+              lineHeight: '1.5',
+              color: theme.colors.textMedium,
+              margin: 0,
+            }}>
+              {activeCategoryData.blurb}
+            </p>
+          </div>
+
           <p style={{
             fontSize: '13px',
             color: theme.colors.textLight,
