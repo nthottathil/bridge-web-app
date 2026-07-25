@@ -280,10 +280,10 @@ function MatchCard({ match, onClick }) {
 
 function ChatRoomScreen({ data }) {
   const [messages, setMessages] = useState([
-    { id: 1, sender: 'system', text: 'Welcome to your Bridge group! 🎉' },
+    { id: 1, sender: 'system', text: 'Welcome to your Bridge group!' },
     { id: 2, sender: 'Alex Chen', text: 'Hiya everyone! Excited to meet you all!' },
     { id: 3, sender: 'Jordan Williams', text: 'Hi! Anyone free for a coffee this weekend?' },
-    { id: 4, sender: 'Sam Patel', text: 'Count me in! I know a cracking spot in Shoreditch 🤙' }
+    { id: 4, sender: 'Sam Patel', text: 'Count me in! I know a cracking spot in Shoreditch' }
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [showProfile, setShowProfile] = useState(false);

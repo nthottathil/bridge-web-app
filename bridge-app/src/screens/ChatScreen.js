@@ -428,7 +428,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
         const reader = new FileReader();
         reader.onload = async () => {
           try {
-            const sent = await groupsAPI.sendMessage(groupData.group_id, '🎤 Voice note sent');
+            const sent = await groupsAPI.sendMessage(groupData.group_id, 'Voice note sent');
             setMessages(prev => [...prev, sent]);
             lastMessageTime.current = sent.created_at;
             scrollToBottom();

@@ -90,7 +90,7 @@ def create_meetup(
     message = Message(
         group_id=group_id,
         user_id=current_user.id,
-        message_text=f"📍 Meetup created: {location}",
+        message_text=f"Meetup created: {location}",
         message_type="meetup",
         metadata_json={"meetup_id": meetup.id}
     )

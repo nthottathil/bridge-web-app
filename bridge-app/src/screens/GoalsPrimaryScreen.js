@@ -1,34 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SplitLayout } from '../components';
 import { theme } from '../theme';
 
 const CATEGORIES = [
-  { key: 'build', label: 'Build', icon: '🔨', subtitle: 'create something', goals: [
+  { key: 'build', label: 'Build', subtitle: 'I want to create something', goals: [
     'Launch a startup',
-    'Build a side project',
+    'Build a side project/app',
     'Grow a brand/audience',
     'Launch a social enterprise',
   ]},
-  { key: 'climb', label: 'Climb', icon: '🧗', subtitle: 'advance my career', goals: [
-    'Get promoted in my current role',
-    'Land a senior role',
-    'Transition into a new industry',
-    'Build my professional network',
-    'Strengthen my CV & LinkedIn presence',
+  { key: 'climb', label: 'Climb', subtitle: 'I want to advance my career', goals: [
+    'Land my first graduate role',
+    'Switch industries',
+    'Get promoted/grow in my current role',
+    'Build a professional skill set',
   ]},
-  { key: 'grow', label: 'Grow', icon: '🌱', subtitle: 'become a better version of myself', goals: [
-    'Develop new technical skills',
-    'Improve my mindset & habits',
-    'Build a portfolio of projects',
-    'Learn from mentors',
+  { key: 'grow', label: 'Grow', subtitle: 'I want to become a better version of myself', goals: [
+    'Settling into a new city',
+    'Mental health & emotional wellbeing',
+    'Fitness & physical health',
+    'Building better habits & self-improvement',
   ]},
-  { key: 'passion', label: 'Passion', icon: '❤️', subtitle: 'find my people', goals: [
-    'Find collaborators',
-    'Build a community around my craft',
-    'Mentor others in my field',
-    'Pursue a creative project',
+  { key: 'passion', label: 'Passion', subtitle: 'I want to find my people', goals: [
+    'Meet people with similar interests',
   ]},
 ];
+
+const VALID_GOALS = new Set(CATEGORIES.flatMap(c => c.goals));
 
 function CategoryChip({ category, onClick, selected }) {
   return (
@@ -44,10 +42,7 @@ function CategoryChip({ category, onClick, selected }) {
         boxShadow: selected ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
       }}
     >
-      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '16px' }}>{category.icon}</span>
-        {category.label}
-      </span>
+      <span>{category.label}</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="5" y1="12" x2="19" y2="12" />
         <polyline points="12 5 19 12 12 19" />
@@ -60,11 +55,20 @@ function GoalsPrimaryScreen({ data, update }) {
   const matchingCategory = CATEGORIES.find(c => c.goals.includes(data.primaryGoal));
   const [selectedCategory, setSelectedCategory] = useState(matchingCategory || null);
 
+  // Drop a stored goal that isn't in the current canonical list
+  // (e.g. a leftover from an older app version with different sub-goals).
+  useEffect(() => {
+    if (data.primaryGoal && !VALID_GOALS.has(data.primaryGoal)) {
+      update('primaryGoal', '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <SplitLayout
       currentTab={1}
       leftTitle="Goals"
-      subtitle="Select the ONE goal that matters most to you. This will be the foundation of your matches."
+      subtitle="Pick the area that matters most to you, then choose ONE sub-goal. You will only meet people who chose the same sub-goal."
       rightContent={
         <div style={{ backgroundColor: '#fff', borderRadius: '20px', padding: '20px' }}>
           {!selectedCategory ? (
@@ -95,9 +99,13 @@ function GoalsPrimaryScreen({ data, update }) {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
-                <span>{selectedCategory.icon}</span>
                 {selectedCategory.label}
               </button>
+
+              <p style={{
+                fontSize: '13px', color: theme.colors.textMedium,
+                margin: '0 0 12px', paddingLeft: '4px',
+              }}>Pick one sub-goal.</p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {selectedCategory.goals.map(goal => {
@@ -116,7 +124,6 @@ function GoalsPrimaryScreen({ data, update }) {
                         textAlign: 'left',
                       }}
                     >
-                      <span>{selectedCategory.icon}</span>
                       {goal}
                     </button>
                   );
