@@ -1,42 +1,62 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SplitLayout } from '../components';
 import { theme } from '../theme';
 
-const CATEGORIES = {
-  'Motivation': [
-    'Why does this goal matter to you right now?',
-    'What changed that made you take this seriously?',
-    'What would happen if you don\'t pursue this?',
-    'What does success look like in 6 months?',
-    'Who are you doing this for \u2014 yourself or others?',
-  ],
-  'Struggles': [
-    'What\'s the biggest challenge you\'re facing right now?',
-    'How do you handle failure or rejection?',
-    'What skill do you wish you were better at?',
-    'What drives you to keep going when things get tough?',
-    'What\'s one thing you\'d change about your current situation?',
-  ],
-  'Mindset': [
-    'Do you prefer working alone or in a team?',
-    'What do you value most in a collaborator?',
-    'What\'s one thing you can teach someone right now?',
-    'What would you do if you knew you couldn\'t fail?',
-    'What\'s one belief that changed how you see the world?',
-  ],
-};
+const CATEGORIES = [
+  {
+    name: 'Ambition',
+    tagline: 'What are you actually about?',
+    questions: [
+      'What are you obsessed with right now?',
+      'What\'s a bet you\'re making on yourself?',
+      'What would you regret not trying?',
+    ],
+  },
+  {
+    name: 'Perspective',
+    tagline: 'How do you actually think?',
+    questions: [
+      'What\'s a popular opinion you genuinely disagree with?',
+      'What\'s something you changed your mind on?',
+      'What belief do you hold that most people around you don\'t?',
+    ],
+  },
+  {
+    name: 'Character',
+    tagline: 'What makes you, you?',
+    questions: [
+      'What are you terrible at but love anyway?',
+      'What do your closest friends always come to you for?',
+      'What\'s your most chaotic quality?',
+      'What\'s something you\'d only tell a stranger?',
+    ],
+  },
+];
 
-const CATEGORY_NAMES = Object.keys(CATEGORIES);
+const VALID_QUESTIONS = new Set(CATEGORIES.flatMap(c => c.questions));
 
 function PerspectiveScreen({ data, update, onHideNav }) {
-  const [activeCategory, setActiveCategory] = useState('Motivation');
+  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].name);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [currentAnswer, setCurrentAnswer] = useState('');
   const answers = data.perspectiveAnswers || {};
+  const activeCategoryData = CATEGORIES.find(c => c.name === activeCategory) || CATEGORIES[0];
+
+  // Drop answers to questions that are no longer in the current set, so
+  // retired prompts don't linger on the profile.
+  useEffect(() => {
+    const kept = Object.fromEntries(
+      Object.entries(answers).filter(([q]) => VALID_QUESTIONS.has(q))
+    );
+    if (Object.keys(kept).length !== Object.keys(answers).length) {
+      update('perspectiveAnswers', kept);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Check if a category has any answered questions
   const categoryHasAnswer = (cat) => {
-    return CATEGORIES[cat].some(q => answers[q]?.trim());
+    return cat.questions.some(q => answers[q]?.trim());
   };
 
   // Handle selecting a question to answer
@@ -162,13 +182,13 @@ function PerspectiveScreen({ data, update, onHideNav }) {
             marginBottom: '16px',
             flexWrap: 'wrap',
           }}>
-            {CATEGORY_NAMES.map(cat => {
-              const isActive = activeCategory === cat;
+            {CATEGORIES.map(cat => {
+              const isActive = activeCategory === cat.name;
               const hasAnswer = categoryHasAnswer(cat);
               return (
                 <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  key={cat.name}
+                  onClick={() => setActiveCategory(cat.name)}
                   style={{
                     padding: '8px 16px',
                     borderRadius: '20px',
@@ -189,13 +209,21 @@ function PerspectiveScreen({ data, update, onHideNav }) {
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
                   )}
-                  {cat}
+                  {cat.name}
                 </button>
               );
             })}
           </div>
 
-          {/* Instruction */}
+          {/* Category tagline + instruction */}
+          <p style={{
+            fontSize: '15px',
+            fontWeight: '600',
+            color: theme.colors.textDark,
+            marginBottom: '4px',
+          }}>
+            {activeCategoryData.tagline}
+          </p>
           <p style={{
             fontSize: '13px',
             color: theme.colors.textLight,
@@ -206,7 +234,7 @@ function PerspectiveScreen({ data, update, onHideNav }) {
 
           {/* Question list */}
           <div>
-            {CATEGORIES[activeCategory].map((question, i) => {
+            {activeCategoryData.questions.map((question, i) => {
               const hasAnswer = answers[question]?.trim();
               return (
                 <button
@@ -217,7 +245,7 @@ function PerspectiveScreen({ data, update, onHideNav }) {
                     width: '100%',
                     padding: '16px 0',
                     border: 'none',
-                    borderBottom: i < CATEGORIES[activeCategory].length - 1
+                    borderBottom: i < activeCategoryData.questions.length - 1
                       ? '1px solid #e8e8e8' : 'none',
                     backgroundColor: 'transparent',
                     cursor: 'pointer',
