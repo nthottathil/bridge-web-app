@@ -16,7 +16,7 @@ const FOCUS_OPTIONS = [
   'Skills refiner', 'Side hustler', 'Explorer',
 ];
 
-function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
+function ProfileScreen({ onBack, onLogout, onReplayOnboarding, inGroup = false }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -25,9 +25,21 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
+  // Your profile is what your group matched with, so it's frozen for as long
+  // as you're in one.
+  const startEditing = () => {
+    if (inGroup) return;
+    setEditing(true);
+  };
+
+  const pickPhoto = () => {
+    if (inGroup) return;
+    fileInputRef.current?.click();
+  };
+
   const handlePhotoSelect = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || inGroup) return;
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -180,7 +192,7 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
   const answeredPrompts = Object.entries(perspectiveAnswers).filter(([, v]) => v && v.trim());
 
   // ─── EDIT MODE ───
-  if (editing) {
+  if (editing && !inGroup) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -414,7 +426,7 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
 
-          {onReplayOnboarding && (
+          {onReplayOnboarding && !inGroup && (
             <button onClick={onReplayOnboarding} style={{
               width: '100%', padding: '14px', fontSize: '15px', fontWeight: '500',
               backgroundColor: 'transparent', color: theme.colors.primary,
@@ -467,6 +479,23 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
           <BridgeLogo />
         </div>
 
+        {inGroup && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: '10px',
+            margin: '0 16px 12px', padding: '12px 14px',
+            backgroundColor: '#fff', borderRadius: '14px',
+            border: `1px solid ${theme.colors.borderLight}`,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium} style={{ flexShrink: 0, marginTop: '1px' }}>
+              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/>
+            </svg>
+            <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: 0, lineHeight: '1.5' }}>
+              Your profile is locked while you're in a group — it's what your
+              group matched with. Leave the group to make changes.
+            </p>
+          </div>
+        )}
+
         {/* Profile hero card */}
         <div style={{
           backgroundColor: '#fff',
@@ -476,25 +505,28 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
           position: 'relative',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}>
-          {/* Edit pencil — top right of card */}
-          <button onClick={() => setEditing(true)} aria-label="Edit profile" style={{
-            position: 'absolute', top: '14px', right: '14px',
-            width: '32px', height: '32px', borderRadius: '50%',
-            backgroundColor: 'transparent', border: 'none',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
-              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-            </svg>
-          </button>
+          {/* Edit pencil — top right of card (hidden while in a group) */}
+          {!inGroup && (
+            <button onClick={startEditing} aria-label="Edit profile" style={{
+              position: 'absolute', top: '14px', right: '14px',
+              width: '32px', height: '32px', borderRadius: '50%',
+              backgroundColor: 'transparent', border: 'none',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+            </button>
+          )}
 
           {/* Profile photo */}
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
             <div
-              onClick={() => fileInputRef.current?.click()}
+              onClick={pickPhoto}
               style={{
                 width: '140px', height: '160px', borderRadius: '16px',
-                backgroundColor: '#e8e8e8', overflow: 'hidden', cursor: 'pointer',
+                backgroundColor: '#e8e8e8', overflow: 'hidden',
+                cursor: inGroup ? 'default' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
               }}
@@ -579,16 +611,18 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
           position: 'relative',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}>
-          <button onClick={() => setEditing(true)} aria-label="Edit goal & perspective" style={{
-            position: 'absolute', top: '14px', right: '14px',
-            width: '32px', height: '32px', borderRadius: '50%',
-            backgroundColor: 'transparent', border: 'none',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
-              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-            </svg>
-          </button>
+          {!inGroup && (
+            <button onClick={startEditing} aria-label="Edit goal & perspective" style={{
+              position: 'absolute', top: '14px', right: '14px',
+              width: '32px', height: '32px', borderRadius: '50%',
+              backgroundColor: 'transparent', border: 'none',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={theme.colors.textMedium}>
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+            </button>
+          )}
 
           {/* Goal section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>

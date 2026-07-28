@@ -258,6 +258,7 @@ function AppContent() {
         <ProfileScreen
           onBack={() => setShowProfile(false)}
           onLogout={handleLogout}
+          inGroup={!!groupData}
           onReplayOnboarding={async () => {
             setShowProfile(false);
             setReplayMode(true);
