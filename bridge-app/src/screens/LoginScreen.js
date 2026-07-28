@@ -17,12 +17,20 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [slowNotice, setSlowNotice] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
       setError('Please enter both email and password');
       return;
     }
+
+    // The server sleeps when idle, so the first request of the day can take
+    // most of a minute. Explain the wait instead of looking frozen.
+    const slowTimer = setTimeout(
+      () => setSlowNotice('Waking up the server — this can take up to a minute on the free plan.'),
+      4000
+    );
 
     try {
       setLoading(true);
@@ -32,8 +40,16 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
       onLoginSuccess(profile);
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.detail || 'Invalid email or password');
+      if (err.code === 'ECONNABORTED') {
+        setError('The server took too long to respond. Please try again.');
+      } else if (!err.response) {
+        setError('Can\'t reach the server. Check your connection and try again.');
+      } else {
+        setError(err.response?.data?.detail || 'Invalid email or password');
+      }
     } finally {
+      clearTimeout(slowTimer);
+      setSlowNotice('');
       setLoading(false);
     }
   };
@@ -303,6 +319,23 @@ function LoginScreen({ onLoginSuccess, onSwitchToSignup }) {
           >
             Forgot password?
           </button>
+
+          {loading && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '12px', backgroundColor: 'rgba(255,255,255,0.6)',
+              borderRadius: '8px', color: theme.colors.textMedium,
+              fontSize: '13px', marginTop: '12px',
+            }}>
+              <span style={{
+                width: '16px', height: '16px', flexShrink: 0,
+                border: `2px solid ${theme.colors.borderLight}`,
+                borderTop: `2px solid ${theme.colors.primary}`,
+                borderRadius: '50%', animation: 'spin 1s linear infinite',
+              }} />
+              {slowNotice || 'Checking your details...'}
+            </div>
+          )}
 
           {error && (
             <div style={{

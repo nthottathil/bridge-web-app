@@ -1,42 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SplitLayout } from '../components';
 import { theme } from '../theme';
+import { PERSPECTIVE_CATEGORIES, ALL_PERSPECTIVE_QUESTIONS } from '../constants/profileOptions';
 
-const CATEGORIES = [
-  {
-    name: 'Ambition',
-    tagline: 'What are you actually about?',
-    blurb: 'What you\'re chasing right now, and what you\'re willing to bet on.',
-    questions: [
-      'What are you obsessed with right now?',
-      'What\'s a bet you\'re making on yourself?',
-      'What would you regret not trying?',
-    ],
-  },
-  {
-    name: 'Perspective',
-    tagline: 'How do you actually think?',
-    blurb: 'The opinions and ideas you\'ve arrived at yourself.',
-    questions: [
-      'What\'s a popular opinion you genuinely disagree with?',
-      'What\'s something you changed your mind on?',
-      'What belief do you hold that most people around you don\'t?',
-    ],
-  },
-  {
-    name: 'Character',
-    tagline: 'What makes you, you?',
-    blurb: 'The quirks your closest friends would recognise you by.',
-    questions: [
-      'What are you terrible at but love anyway?',
-      'What do your closest friends always come to you for?',
-      'What\'s your most chaotic quality?',
-      'What\'s something you\'d only tell a stranger?',
-    ],
-  },
-];
-
-const VALID_QUESTIONS = new Set(CATEGORIES.flatMap(c => c.questions));
+const CATEGORIES = PERSPECTIVE_CATEGORIES;
+const VALID_QUESTIONS = new Set(ALL_PERSPECTIVE_QUESTIONS);
 
 function PerspectiveScreen({ data, update, onHideNav }) {
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].name);

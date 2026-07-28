@@ -4,26 +4,38 @@ import { theme } from '../theme';
 import BridgeLogo from '../components/BridgeLogo';
 import ChatScreen from './ChatScreen';
 
-function MatchingScreen({ data, onBack, onLogout, onProfile }) {
+function MatchingScreen({ data, onBack, onLogout, onProfile, onGroupFormed }) {
   const [matchState, setMatchState] = useState('searching');
   const [matches, setMatches] = useState([]);
   const [incomingRequests, setIncomingRequests] = useState([]);
+  const [sentRequest, setSentRequest] = useState(null);
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [view, setView] = useState('carousel'); // 'carousel' | 'profile' | 'sent' | 'waiting'
+  const [view, setView] = useState('carousel'); // 'carousel' | 'profile'
   const [selectedMatch, setSelectedMatch] = useState(null);
-  const [bridgeSent, setBridgeSent] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     loadMatches();
     checkExistingGroup();
-    loadIncomingRequests();
-    const pollInterval = setInterval(() => loadIncomingRequests(), 5000);
+    loadRequests();
+    // One interval covers incoming requests, outgoing requests and group
+    // creation, so a user waiting on someone else's answer gets moved on
+    // automatically.
+    const pollInterval = setInterval(() => {
+      loadRequests();
+      checkExistingGroup();
+    }, 5000);
     return () => clearInterval(pollInterval);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Hand off to the app shell (home + bottom nav) once a group exists.
+  useEffect(() => {
+    if (group && onGroupFormed) onGroupFormed();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group]);
 
   const loadMatches = async () => {
     try {
@@ -53,10 +65,14 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
     }
   };
 
-  const loadIncomingRequests = async () => {
+  const loadRequests = async () => {
     try {
-      const requests = await matchingAPI.getMatchRequests();
-      setIncomingRequests(requests);
+      const [incoming, sent] = await Promise.all([
+        matchingAPI.getMatchRequests().catch(() => []),
+        matchingAPI.getSentMatchRequests().catch(() => []),
+      ]);
+      setIncomingRequests(incoming || []);
+      setSentRequest((sent && sent[0]) || null);
     } catch (err) {
       console.error('Error loading match requests:', err);
     }
@@ -85,24 +101,23 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
 
   const handleBridge = async (match) => {
     setSelectedMatch(match);
+    const waitingOn = {
+      to_user: { user_id: match.user_id, first_name: match.first_name },
+    };
     try {
       await matchingAPI.sendMatchRequest(match.user_id);
-      setBridgeSent(true);
-      setView('sent');
-
-      // Poll for group creation
-      const pollInterval = setInterval(async () => {
-        try {
-          const groupData = await groupsAPI.getMyGroup();
-          if (groupData) {
-            setGroup(groupData);
-            clearInterval(pollInterval);
-          }
-        } catch (err) { /* ignore */ }
-      }, 2000);
-      setTimeout(() => clearInterval(pollInterval), 30000);
+      setSentRequest(waitingOn);
+      loadRequests();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to send match request');
+      const detail = err.response?.data?.detail || '';
+      // Already bridged with this person — show the waiting state rather
+      // than an error, which is what the user actually wants to see.
+      if (detail.toLowerCase().includes('already exists')) {
+        setSentRequest(waitingOn);
+        loadRequests();
+      } else {
+        setError(detail || 'Failed to send match request');
+      }
     }
   };
 
@@ -111,13 +126,39 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
     setView('profile');
   };
 
-  // If user is in a group, show chat
+  // Group exists: the app shell takes over (home + bottom nav) via
+  // onGroupFormed. Only fall back to rendering chat inline if no handler.
   if (group) {
+    if (onGroupFormed) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '48px', height: '48px',
+              border: `3px solid ${theme.colors.borderLight}`,
+              borderTop: `3px solid ${theme.colors.primary}`,
+              borderRadius: '50%', margin: '0 auto 16px',
+              animation: 'spin 1s linear infinite',
+            }} />
+            <p style={{ fontSize: '16px', color: theme.colors.textDark }}>
+              Your group is ready — opening it now...
+            </p>
+          </div>
+        </div>
+      );
+    }
     return <ChatScreen groupData={group} userData={data} onProfile={onProfile} />;
   }
 
-  // "You're in!! Waiting on the squad." screen
-  if (view === 'waiting') {
+  // "You're in!! Waiting on the squad." — the home screen for someone whose
+  // bridge request hasn't been answered yet. Shown instead of the carousel so
+  // they can't re-bridge with someone they've already requested.
+  if (sentRequest) {
+    const waitingOnName = sentRequest.to_user?.first_name;
     return (
       <div style={{
         minHeight: '100vh',
@@ -153,77 +194,46 @@ function MatchingScreen({ data, onBack, onLogout, onProfile }) {
             fontSize: '14px', color: theme.colors.textMedium,
             margin: '0 0 20px', lineHeight: '1.5',
           }}>
-            Once everyone says yes, your group chat will be created.
+            {waitingOnName
+              ? `We've sent your bridge request to ${waitingOnName}. As soon as they accept, your group chat opens automatically — you'll get an email too.`
+              : 'Once everyone says yes, your group chat will be created.'}
           </p>
-          <button
-            onClick={() => { setView('carousel'); }}
-            style={{
-              padding: '12px 28px',
-              borderRadius: '25px',
-              border: 'none',
-              backgroundColor: theme.colors.primary,
-              color: '#fff',
-              fontSize: '15px',
-              fontWeight: '600',
-              cursor: 'pointer',
-            }}
-          >
-            Go to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
 
-  // "Yay!! The selection is done." confirmation screen
-  if (view === 'sent' && bridgeSent) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        background: `linear-gradient(180deg, ${theme.colors.gradientTop} 0%, ${theme.colors.gradientBottom} 100%)`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-      }}>
-        <div style={{
-          backgroundColor: theme.colors.surfaceCard,
-          borderRadius: '20px',
-          padding: '40px 28px',
-          maxWidth: '380px',
-          width: '100%',
-          textAlign: 'center',
-          backdropFilter: 'blur(10px)',
-        }}>
-          <h1 style={{
-            fontSize: '26px',
-            fontWeight: '700',
-            color: theme.colors.textDark,
-            marginBottom: '8px',
-          }}>Yay!! The selection is done.</h1>
-          <p style={{
-            fontSize: '14px',
-            color: theme.colors.textMedium,
-            marginBottom: '28px',
-            lineHeight: '1.5',
-          }}>
-            We will send notification when bridge successfully
-          </p>
-          <button
-            onClick={() => setView('waiting')}
-            style={{
-              padding: '12px 28px',
-              borderRadius: '25px',
-              border: 'none',
-              backgroundColor: theme.colors.primary,
-              color: '#fff',
-              fontSize: '15px',
-              fontWeight: '600',
-              cursor: 'pointer',
-            }}
-          >
-            Go to Home
-          </button>
+          {incomingRequests.length > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <h4 style={{ fontSize: '14px', fontWeight: '600', color: theme.colors.textDark, margin: '0 0 10px' }}>
+                Someone bridged with you
+              </h4>
+              {incomingRequests.map(req => (
+                <IncomingRequestCard
+                  key={req.request_id}
+                  request={req}
+                  onAccept={() => handleAcceptRequest(req.request_id)}
+                  onReject={() => handleRejectRequest(req.request_id)}
+                />
+              ))}
+            </div>
+          )}
+
+          {error && (
+            <div style={{
+              padding: '10px 14px', backgroundColor: theme.colors.errorBg,
+              borderRadius: '10px', color: theme.colors.error, marginBottom: '16px',
+              fontSize: '13px',
+            }}>{error}</div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              width: '16px', height: '16px',
+              border: `2px solid ${theme.colors.borderLight}`,
+              borderTop: `2px solid ${theme.colors.primary}`,
+              borderRadius: '50%', animation: 'spin 1s linear infinite',
+            }} />
+            <span style={{ fontSize: '13px', color: theme.colors.textLight }}>
+              Checking for updates...
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -609,9 +619,13 @@ function IncomingRequestCard({ request, onAccept, onReject }) {
 }
 
 function MatchCard({ match, onBridge, onViewProfile }) {
+  const answered = Object.entries(match.perspective_answers || {})
+    .filter(([, v]) => v && v.trim());
+  const topInterests = (match.interests || []).slice(0, 4);
+  const extraInterests = (match.interests || []).length - topInterests.length;
+
   return (
     <div
-      onClick={onViewProfile}
       style={{
         flex: '0 0 85%',
         maxWidth: '360px',
@@ -621,80 +635,147 @@ function MatchCard({ match, onBridge, onViewProfile }) {
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
         animation: 'fadeIn 0.4s ease',
-        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Photo */}
-      <div style={{
-        height: '340px',
-        backgroundColor: '#e8e8e8',
-        overflow: 'hidden',
-      }}>
-        {match.profile_photo_url ? (
-          <img src={match.profile_photo_url} alt={match.first_name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : (
-          <div style={{
-            width: '100%', height: '100%',
-            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryLight} 100%)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: '64px', fontWeight: '600',
-          }}>
-            {match.first_name[0]}
-          </div>
-        )}
-      </div>
-
-      {/* Card content */}
       <div style={{ padding: '16px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: '600', color: theme.colors.textDark, margin: '0 0 6px' }}>
-          {match.first_name} {match.surname || ''}
-        </h3>
+        {/* Header row: small photo + identity */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+          <div style={{
+            width: '72px', height: '84px', borderRadius: '14px',
+            backgroundColor: '#e8e8e8', overflow: 'hidden', flexShrink: 0,
+          }}>
+            {match.profile_photo_url ? (
+              <img src={match.profile_photo_url} alt={match.first_name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{
+                width: '100%', height: '100%',
+                background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryLight} 100%)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontSize: '28px', fontWeight: '600',
+              }}>
+                {match.first_name[0]}
+              </div>
+            )}
+          </div>
 
-        {/* Location | Focus */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          {match.location && (
-            <span style={{ fontSize: '13px', color: theme.colors.textMedium }}>
-              {match.location}
-            </span>
-          )}
-          {match.location && match.focus && (
-            <span style={{ color: '#ddd' }}>|</span>
-          )}
-          {match.focus && (
-            <span style={{
-              fontSize: '12px', padding: '3px 10px',
-              border: `1px solid ${theme.colors.textMedium}`,
-              borderRadius: '16px', color: theme.colors.textDark,
-              fontWeight: '500',
-            }}>
-              {match.focus}
-            </span>
-          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: '600', color: theme.colors.textDark, margin: 0 }}>
+                {match.first_name} {match.surname || ''}{match.age ? `, ${match.age}` : ''}
+              </h3>
+              {match.compatibility_score != null && (
+                <span style={{ fontSize: '13px', fontWeight: '700', color: theme.colors.primary, flexShrink: 0 }}>
+                  {match.compatibility_score}%
+                </span>
+              )}
+            </div>
+            {match.profession && (
+              <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '2px 0 0' }}>
+                {match.profession}
+              </p>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+              {match.location && (
+                <span style={{ fontSize: '12px', color: theme.colors.textMedium }}>{match.location}</span>
+              )}
+              {match.location && match.focus && <span style={{ color: '#ddd' }}>|</span>}
+              {match.focus && (
+                <span style={{
+                  fontSize: '11px', padding: '2px 9px',
+                  border: `1px solid ${theme.colors.textMedium}`,
+                  borderRadius: '16px', color: theme.colors.textDark, fontWeight: '500',
+                }}>
+                  {match.focus}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
+        {/* Headline */}
         <p style={{
-          fontSize: '13px', color: theme.colors.textMedium, lineHeight: '1.5',
-          marginBottom: '14px',
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
+          fontSize: '13px', color: theme.colors.textDark, lineHeight: '1.5',
+          margin: '0 0 12px',
         }}>
           {match.headline || match.statement || 'No bio yet'}
         </p>
 
-        <button
-          onClick={(e) => { e.stopPropagation(); onBridge(); }}
-          style={{
-            width: '100%', padding: '10px', borderRadius: '14px',
-            border: `1.5px solid ${theme.colors.textDark}`,
-            backgroundColor: 'transparent',
-            color: theme.colors.textDark,
-            fontSize: '14px', fontWeight: '700',
-            cursor: 'pointer', letterSpacing: '2px',
-          }}
-        >
-          BRIDGE
-        </button>
+        {/* Goal */}
+        {match.primary_goal && (
+          <div style={{
+            backgroundColor: '#f5f7fa', borderRadius: '12px',
+            padding: '10px 12px', marginBottom: '10px',
+          }}>
+            <div style={{
+              fontSize: '10px', fontWeight: '700', letterSpacing: '1px',
+              color: theme.colors.textLight, marginBottom: '2px',
+            }}>GOAL</div>
+            <div style={{ fontSize: '13px', fontWeight: '600', color: theme.colors.textDark }}>
+              {match.primary_goal}
+            </div>
+          </div>
+        )}
+
+        {/* Perspective answer — one, as a taster */}
+        {answered.length > 0 && (
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{ fontSize: '12px', fontWeight: '600', color: theme.colors.textDark, lineHeight: '1.4' }}>
+              {answered[0][0]}
+            </div>
+            <p style={{
+              fontSize: '12px', color: theme.colors.textMedium, margin: '2px 0 0', lineHeight: '1.5',
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+            }}>
+              {answered[0][1]}
+            </p>
+          </div>
+        )}
+
+        {/* Interests */}
+        {topInterests.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
+            {topInterests.map(interest => (
+              <span key={interest} style={{
+                padding: '4px 10px', borderRadius: '14px', border: '1px solid #ddd',
+                fontSize: '11px', color: theme.colors.textDark,
+              }}>{interest}</span>
+            ))}
+            {extraInterests > 0 && (
+              <span style={{ padding: '4px 4px', fontSize: '11px', color: theme.colors.textLight }}>
+                +{extraInterests}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Actions — explicit, so nothing depends on guessing the card is tappable */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={onViewProfile}
+            style={{
+              flex: 1, padding: '10px', borderRadius: '14px',
+              border: `1.5px solid ${theme.colors.borderLight}`,
+              backgroundColor: 'transparent', color: theme.colors.textMedium,
+              fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+            }}
+          >
+            Full profile
+          </button>
+          <button
+            onClick={onBridge}
+            style={{
+              flex: 1, padding: '10px', borderRadius: '14px',
+              border: 'none', backgroundColor: theme.colors.primary,
+              color: '#fff', fontSize: '13px', fontWeight: '700',
+              cursor: 'pointer', letterSpacing: '2px',
+            }}
+          >
+            BRIDGE
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -143,6 +143,39 @@ def send_match_request(
     }
 
 
+@router.get("/requests/sent", response_model=List[dict])
+def get_sent_match_requests(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get the pending match requests the current user has sent.
+
+    Lets the client show a 'waiting on them' state instead of putting the
+    user back in front of matches they have already bridged with.
+    """
+    requests = db.query(MatchRequest).filter(
+        MatchRequest.from_user_id == current_user.id,
+        MatchRequest.status == "pending"
+    ).all()
+
+    response = []
+    for req in requests:
+        to_user = db.query(User).filter(User.id == req.to_user_id).first()
+        if to_user:
+            response.append({
+                "request_id": req.id,
+                "to_user": {
+                    "user_id": to_user.id,
+                    "first_name": to_user.first_name,
+                    "profile_photo_url": to_user.profile_photo_url,
+                },
+                "created_at": req.created_at,
+            })
+
+    return response
+
+
 @router.get("/requests", response_model=List[MatchRequestResponse])
 def get_match_requests(
     current_user: User = Depends(get_current_user),
@@ -166,13 +199,18 @@ def get_match_requests(
                 "from_user": {
                     "user_id": from_user.id,
                     "first_name": from_user.first_name,
+                    "surname": from_user.surname,
                     "age": from_user.age,
                     "profession": from_user.profession,
                     "statement": from_user.statement,
                     "interests": from_user.interests,
                     "compatibility_score": compatibility,
                     "location": from_user.location,
-                    "primary_goal": from_user.primary_goal
+                    "primary_goal": from_user.primary_goal,
+                    "focus": getattr(from_user, "focus", None),
+                    "headline": getattr(from_user, "headline", None),
+                    "profile_photo_url": getattr(from_user, "profile_photo_url", None),
+                    "perspective_answers": getattr(from_user, "perspective_answers", None),
                 },
                 "created_at": req.created_at
             })

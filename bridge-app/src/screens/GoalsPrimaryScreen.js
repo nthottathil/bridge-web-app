@@ -1,32 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { SplitLayout } from '../components';
 import { theme } from '../theme';
+import { GOAL_CATEGORIES, ALL_GOALS } from '../constants/profileOptions';
 
-const CATEGORIES = [
-  { key: 'build', label: 'Build', subtitle: 'I want to create something', goals: [
-    'Launch a startup',
-    'Build a side project/app',
-    'Grow a brand/audience',
-    'Launch a social enterprise',
-  ]},
-  { key: 'climb', label: 'Climb', subtitle: 'I want to advance my career', goals: [
-    'Land my first graduate role',
-    'Switch industries',
-    'Get promoted/grow in my current role',
-    'Build a professional skill set',
-  ]},
-  { key: 'grow', label: 'Grow', subtitle: 'I want to become a better version of myself', goals: [
-    'Settling into a new city',
-    'Mental health & emotional wellbeing',
-    'Fitness & physical health',
-    'Building better habits & self-improvement',
-  ]},
-  { key: 'passion', label: 'Passion', subtitle: 'I want to find my people', goals: [
-    'Meet people with similar interests',
-  ]},
-];
-
-const VALID_GOALS = new Set(CATEGORIES.flatMap(c => c.goals));
+const CATEGORIES = GOAL_CATEGORIES;
+const VALID_GOALS = new Set(ALL_GOALS);
 
 function CategoryChip({ category, onClick, selected }) {
   return (

@@ -8,6 +8,9 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
+  // The backend sleeps on Render's free tier; a cold start can take ~50s.
+  // Without a ceiling a dead request hangs forever with no feedback.
+  timeout: 90000,
 });
 
 api.interceptors.request.use((config) => {
@@ -81,6 +84,10 @@ export const matchingAPI = {
   },
   getMatchRequests: async () => {
     const response = await api.get('/api/matches/requests');
+    return response.data;
+  },
+  getSentMatchRequests: async () => {
+    const response = await api.get('/api/matches/requests/sent');
     return response.data;
   },
   acceptMatchRequest: async (requestId) => {

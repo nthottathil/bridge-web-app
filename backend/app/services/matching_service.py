@@ -269,7 +269,9 @@ def find_potential_matches(db: Session, user: User, limit: int = 20) -> List[Dic
         potential_matches.append({
             'user_id': other_user.id,
             'first_name': other_user.first_name,
+            'surname': getattr(other_user, 'surname', None),
             'age': other_user.age,
+            'perspective_answers': getattr(other_user, 'perspective_answers', None),
             'profession': other_user.profession,
             'statement': other_user.statement,
             'interests': other_user.interests,

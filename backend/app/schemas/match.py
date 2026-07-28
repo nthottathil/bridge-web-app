@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import Any, List, Dict, Optional
 from datetime import datetime
 
 
@@ -13,6 +13,13 @@ class MatchResponse(BaseModel):
     compatibility_score: int
     location: str
     primary_goal: str
+    # Fields below are declared so FastAPI doesn't strip them from the
+    # response — the match cards render all of them.
+    surname: Optional[str] = None
+    focus: Optional[str] = None
+    headline: Optional[str] = None
+    profile_photo_url: Optional[str] = None
+    perspective_answers: Optional[Dict[str, Any]] = None
 
     class Config:
         from_attributes = True

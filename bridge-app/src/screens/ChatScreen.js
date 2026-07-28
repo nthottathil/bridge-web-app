@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { groupsAPI, collectionsAPI, meetupsAPI } from '../services/api';
+import { groupsAPI, collectionsAPI, meetupsAPI, tasksAPI } from '../services/api';
 import { theme } from '../theme';
 
 /* ──────────────────────────────────────────────
@@ -217,8 +217,35 @@ function MeetupCard({ msg }) {
    Task Panel (inline, crash-safe)
    ────────────────────────────────────────────── */
 
-function ChatTaskPanel({ groupId }) {
+function ChatTaskPanel({ groupId, currentUserId }) {
   const [expanded, setExpanded] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!groupId) return;
+    let cancelled = false;
+    setLoading(true);
+    tasksAPI.getTasks(groupId)
+      .then(data => { if (!cancelled) setTasks(Array.isArray(data) ? data : []); })
+      .catch(err => console.error('Error loading tasks:', err))
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [groupId]);
+
+  const isDoneByMe = (task) =>
+    (task.completed_by || []).some(u => u.user_id === currentUserId);
+
+  const handleComplete = async (task) => {
+    if (isDoneByMe(task)) return;
+    try {
+      await tasksAPI.completeTask(task.id);
+      const data = await tasksAPI.getTasks(groupId);
+      setTasks(Array.isArray(data) ? data : []);
+    } catch (err) { console.error('Error completing task:', err); }
+  };
+
+  const doneCount = tasks.filter(isDoneByMe).length;
 
   return (
     <div style={{
@@ -242,32 +269,91 @@ function ChatTaskPanel({ groupId }) {
             Let's Get to Know Each Other
           </div>
           <div style={{ fontSize: '12px', color: theme.colors.textLight, marginTop: '2px' }}>
-            Complete these tasks to get to know the group better
+            {tasks.length > 0
+              ? `${doneCount} of ${tasks.length} done — tap to ${expanded ? 'hide' : 'see them'}`
+              : 'Complete these tasks to get to know the group better'}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '12px', flexShrink: 0 }}>
-          {/* Checkmark */}
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={theme.colors.primary} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
-          {/* Progress dots */}
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: theme.colors.primary }} />
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ccc' }} />
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ccc' }} />
-          </div>
+          <span style={{ fontSize: '12px', fontWeight: '600', color: theme.colors.primary }}>
+            {doneCount}/{tasks.length || '–'}
+          </span>
         </div>
       </button>
 
       {expanded && (
         <div style={{ padding: '0 16px 14px', borderTop: '1px solid #f0f0f0' }}>
-          <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '12px 0 0' }}>
-            Tasks will appear here as your group progresses.
-          </p>
+          {loading && (
+            <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '12px 0 0' }}>
+              Loading tasks...
+            </p>
+          )}
+          {!loading && tasks.length === 0 && (
+            <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '12px 0 0' }}>
+              No tasks yet — they'll appear here as your group progresses.
+            </p>
+          )}
+          {!loading && tasks.map(task => {
+            const done = isDoneByMe(task);
+            const others = (task.completed_by || []).filter(u => u.user_id !== currentUserId);
+            return (
+              <div key={task.id} style={{
+                display: 'flex', alignItems: 'flex-start', gap: '10px',
+                padding: '10px 0', borderBottom: '1px solid #f5f5f5',
+              }}>
+                <button
+                  onClick={() => handleComplete(task)}
+                  disabled={done}
+                  aria-label={done ? 'Completed' : 'Mark as done'}
+                  style={{
+                    width: '20px', height: '20px', borderRadius: '50%', marginTop: '1px',
+                    border: `1.5px solid ${done ? theme.colors.primary : '#ccc'}`,
+                    backgroundColor: done ? theme.colors.primary : 'transparent',
+                    cursor: done ? 'default' : 'pointer', flexShrink: 0, padding: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  {done && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontSize: '13px', lineHeight: '1.4',
+                    color: done ? theme.colors.textLight : theme.colors.textDark,
+                    textDecoration: done ? 'line-through' : 'none',
+                  }}>
+                    {task.title}
+                  </div>
+                  {others.length > 0 && (
+                    <div style={{ fontSize: '11px', color: theme.colors.textLight, marginTop: '2px' }}>
+                      Done by {others.map(u => u.first_name).join(', ')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
   );
+}
+
+/* Keep one entry per message id, preserving order. Polling and the
+   create/send paths can both deliver the same message. */
+function dedupeById(msgs) {
+  const seen = new Set();
+  return msgs.filter(m => {
+    if (m?.id == null || seen.has(m.id)) return m?.id == null;
+    seen.add(m.id);
+    return true;
+  });
 }
 
 /* ──────────────────────────────────────────────
@@ -280,13 +366,23 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
   const [loading, setLoading] = useState(false);
   const [showPlusMenu, setShowPlusMenu] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const [showFeatureHint, setShowFeatureHint] = useState(false);
   const messagesEndRef = useRef(null);
   const lastMessageTime = useRef(null);
   const imageInputRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
+  const pollInFlight = useRef(false);
 
   const currentUserId = userData?.id || userData?.user_id;
+
+  /* --- one-time nudge so the + menu features get discovered --- */
+  useEffect(() => {
+    if (!localStorage.getItem('bridge_chat_hint_seen')) setShowFeatureHint(true);
+  }, []);
+
+  const dismissFeatureHint = () => {
+    localStorage.setItem('bridge_chat_hint_seen', '1');
+    setShowFeatureHint(false);
+  };
 
   /* --- message polling --- */
   useEffect(() => {
@@ -300,22 +396,27 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
   const loadMessages = async () => {
     try {
       const msgs = await groupsAPI.getMessages(groupData.group_id);
-      setMessages(msgs);
+      setMessages(dedupeById(msgs));
       if (msgs.length > 0) lastMessageTime.current = msgs[msgs.length - 1].created_at;
       scrollToBottom();
     } catch (err) { console.error('Error loading messages:', err); }
   };
 
   const pollNewMessages = async () => {
+    // A poll started before a create/send lands returns that same message
+    // again; without this guard it gets appended a second time.
+    if (pollInFlight.current) return;
+    pollInFlight.current = true;
     try {
       const since = lastMessageTime.current;
       const newMsgs = await groupsAPI.getMessages(groupData.group_id, since);
       if (newMsgs.length > 0) {
-        setMessages(prev => [...prev, ...newMsgs]);
+        setMessages(prev => dedupeById([...prev, ...newMsgs]));
         lastMessageTime.current = newMsgs[newMsgs.length - 1].created_at;
         scrollToBottom();
       }
     } catch (err) { console.error('Error polling messages:', err); }
+    finally { pollInFlight.current = false; }
   };
 
   const scrollToBottom = () => {
@@ -328,7 +429,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
     setLoading(true);
     try {
       const sent = await groupsAPI.sendMessage(groupData.group_id, newMessage.trim());
-      setMessages(prev => [...prev, sent]);
+      setMessages(prev => dedupeById([...prev, sent]));
       setNewMessage('');
       lastMessageTime.current = sent.created_at;
       scrollToBottom();
@@ -364,7 +465,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
         try {
           const sent = await groupsAPI.sendMessage(groupData.group_id, dataUrl);
-          setMessages(prev => [...prev, sent]);
+          setMessages(prev => dedupeById([...prev, sent]));
           lastMessageTime.current = sent.created_at;
           scrollToBottom();
         } catch (err) { console.error('Error sending image:', err); }
@@ -373,40 +474,6 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
     };
     reader.readAsDataURL(file);
     e.target.value = '';
-  };
-
-  /* --- voice recording --- */
-  const toggleRecording = async () => {
-    if (isRecording) {
-      mediaRecorderRef.current?.stop();
-      setIsRecording(false);
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks = [];
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(chunks, { type: 'audio/webm' });
-        const reader = new FileReader();
-        reader.onload = async () => {
-          try {
-            const sent = await groupsAPI.sendMessage(groupData.group_id, 'Voice note sent');
-            setMessages(prev => [...prev, sent]);
-            lastMessageTime.current = sent.created_at;
-            scrollToBottom();
-          } catch (err) { console.error('Error sending voice note:', err); }
-        };
-        reader.readAsDataURL(blob);
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start();
-      setIsRecording(true);
-    } catch (err) {
-      console.error('Microphone access denied:', err);
-    }
   };
 
   /* --- collection creators --- */
@@ -445,11 +512,14 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
   };
 
   /* --- render grouped messages --- */
-  const renderMessageGroup = (group, groupIdx) => {
+  const renderMessageGroup = (group) => {
     const isOwn = group.userId === currentUserId;
 
+    // Keyed by the first message's id, not the array index — an index key
+    // makes React reuse a group's DOM when the list shifts, which showed up
+    // as an older card morphing into a newly created one.
     return (
-      <div key={groupIdx} style={{
+      <div key={group.messages[0]?.id ?? group.key} style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: isOwn ? 'flex-end' : 'flex-start',
@@ -577,7 +647,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
 
       {/* ─── Task Panel ─── */}
       <div style={{ flexShrink: 0, paddingTop: '10px', paddingBottom: '4px' }}>
-        <ChatTaskPanel groupId={groupData?.group_id} />
+        <ChatTaskPanel groupId={groupData?.group_id} currentUserId={currentUserId} />
       </div>
 
       {/* ─── Messages Area ─── */}
@@ -591,7 +661,7 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
             <p style={{ fontSize: '15px' }}>No messages yet. Say hello!</p>
           </div>
         ) : (
-          messageGroups.map((g, i) => renderMessageGroup(g, i))
+          messageGroups.map(g => renderMessageGroup(g))
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -667,19 +737,48 @@ function ChatScreen({ groupData, userData, onBack, onGroupInfo }) {
             }}
           />
 
-          {/* Microphone icon */}
-          <button onClick={toggleRecording} style={{
-            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-            color: isRecording ? '#c33' : '#555', flexShrink: 0, display: 'flex', alignItems: 'center',
-          }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="1" width="6" height="12" rx="3"/>
-              <path d="M5 10a7 7 0 0014 0"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
+          {/* Send */}
+          <button
+            onClick={sendMessage}
+            disabled={!newMessage.trim() || loading}
+            aria-label="Send"
+            style={{
+              background: 'none', border: 'none', padding: 0,
+              cursor: newMessage.trim() && !loading ? 'pointer' : 'default',
+              color: newMessage.trim() && !loading ? theme.colors.primary : '#bbb',
+              flexShrink: 0, display: 'flex', alignItems: 'center',
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
             </svg>
           </button>
         </div>
+
+        {/* First-visit hint pointing at the + menu */}
+        {showFeatureHint && !showPlusMenu && (
+          <div style={{
+            position: 'absolute', bottom: '62px', left: '12px', right: '12px',
+            backgroundColor: theme.colors.primary, color: '#fff',
+            borderRadius: '14px', padding: '12px 14px', zIndex: 48,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+            display: 'flex', alignItems: 'flex-start', gap: '12px',
+          }}>
+            <div style={{ flex: 1, fontSize: '13px', lineHeight: '1.5' }}>
+              Tap <strong>+</strong> to set a Goal of the week or start a Poll for the group.
+            </div>
+            <button onClick={dismissFeatureHint} style={{
+              border: 'none', backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff',
+              borderRadius: '14px', padding: '6px 12px', fontSize: '12px',
+              fontWeight: '600', cursor: 'pointer', flexShrink: 0,
+            }}>Got it</button>
+            <span style={{
+              position: 'absolute', bottom: '-6px', left: '22px',
+              width: '12px', height: '12px', backgroundColor: theme.colors.primary,
+              transform: 'rotate(45deg)',
+            }} />
+          </div>
+        )}
 
         {/* Plus menu overlay */}
         {showPlusMenu && (

@@ -150,15 +150,20 @@ function IntroducingScreen({ data, update }) {
       leftTitle="Introducing yourself.."
       rightContent={
         <div>
-          {/* Optional profile photo */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          {/* Profile photo — first thing people see on your match card */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '14px',
+            backgroundColor: '#fff', borderRadius: '16px',
+            padding: '14px', marginBottom: '18px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          }}>
             <div
               onClick={() => fileInputRef.current?.click()}
               style={{
-                width: '80px', height: '80px', borderRadius: '50%',
-                backgroundColor: data.profilePhoto ? 'transparent' : '#fff',
+                width: '72px', height: '72px', borderRadius: '50%',
+                backgroundColor: data.profilePhoto ? 'transparent' : '#f5f7fa',
                 border: `2px dashed ${data.profilePhoto ? theme.colors.primary : theme.colors.borderLight}`,
-                cursor: 'pointer',
+                cursor: 'pointer', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 overflow: 'hidden', position: 'relative',
               }}
@@ -166,10 +171,31 @@ function IntroducingScreen({ data, update }) {
               {data.profilePhoto ? (
                 <img src={data.profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill={theme.colors.textLight}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={theme.colors.textLight}>
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
               )}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '14px', fontWeight: '600', color: theme.colors.textDark }}>
+                Profile photo
+              </div>
+              <p style={{ fontSize: '12px', color: theme.colors.textMedium, margin: '2px 0 8px', lineHeight: '1.4' }}>
+                This is the first thing people see on your match card.
+              </p>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  padding: '7px 14px', borderRadius: '18px',
+                  border: `1.5px solid ${theme.colors.primary}`,
+                  backgroundColor: data.profilePhoto ? 'transparent' : theme.colors.primary,
+                  color: data.profilePhoto ? theme.colors.primary : '#fff',
+                  fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                }}
+              >
+                {data.profilePhoto ? 'Change photo' : 'Upload photo'}
+              </button>
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoSelect} style={{ display: 'none' }} />
           </div>

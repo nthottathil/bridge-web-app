@@ -1,23 +1,11 @@
 import React, { useEffect } from 'react';
 import { SplitLayout } from '../components';
 import { theme } from '../theme';
+import { INTEREST_CATEGORIES, ALL_INTERESTS, MAX_INTERESTS } from '../constants/profileOptions';
 
-const CATEGORIES = [
-  { label: 'Active & Lifestyle', interests: [
-    'Sport', 'Outdoor & Adventure', 'Wellbeing', 'Food & Drink', 'Travel', 'Nature & Animals',
-  ]},
-  { label: 'Knowledge & Ideas', interests: [
-    'Technology', 'Business', 'Psychology', 'Science', 'Humanities', 'Law',
-    'Politics', 'Social Impact', 'Environment', 'Languages', 'Architecture',
-  ]},
-  { label: 'Culture & Entertainment', interests: [
-    'Music', 'Gaming', 'Media & Pop Culture', 'Film & Video', 'Photography',
-    'Art & Design', 'Reading', 'Writing',
-  ]},
-];
-
-const MAX_SELECTIONS = 5;
-const VALID_SET = new Set(CATEGORIES.flatMap(c => c.interests));
+const CATEGORIES = INTEREST_CATEGORIES;
+const MAX_SELECTIONS = MAX_INTERESTS;
+const VALID_SET = new Set(ALL_INTERESTS);
 
 function InterestsScreen({ data, update }) {
   const interests = data.interests || [];

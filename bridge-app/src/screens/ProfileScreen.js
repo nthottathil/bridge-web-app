@@ -3,15 +3,13 @@ import { authAPI } from '../services/api';
 import { theme } from '../theme';
 import BridgeLogo from '../components/BridgeLogo';
 import { SelectionChip, SliderInput, RangeSlider } from '../components';
+import {
+  GOAL_CATEGORIES,
+  INTEREST_CATEGORIES,
+  MAX_INTERESTS,
+  PERSPECTIVE_CATEGORIES,
+} from '../constants/profileOptions';
 
-const INTERESTS = [
-  'Fitness', 'Tech', 'Startups', 'AI', 'Books', 'Travel',
-  'Music', 'Photography', 'Film', 'Art', 'Design', 'Writing',
-  'Gaming', 'Cooking', 'Yoga', 'Running', 'Football', 'Tennis',
-  'Cycling', 'Hiking', 'Swimming', 'Dance', 'Fashion',
-  'Crypto', 'Marketing', 'Finance', 'Volunteering', 'Languages',
-  'Meditation', 'Podcasts', 'Networking',
-];
 
 const FOCUS_OPTIONS = [
   'Portfolio builder', 'Career transition', 'Start-up founder',
@@ -92,12 +90,20 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
     }));
   };
 
+  // Interests are ranked: click order is the ranking, capped at MAX_INTERESTS.
   const toggleInterest = (interest) => {
     const current = [...(profile.interests || [])];
     const index = current.indexOf(interest);
     if (index > -1) current.splice(index, 1);
-    else current.push(interest);
+    else if (current.length < MAX_INTERESTS) current.push(interest);
     updateField('interests', current);
+  };
+
+  const updatePerspectiveAnswer = (question, answer) => {
+    const next = { ...(profile.perspective_answers || {}) };
+    if (answer.trim()) next[question] = answer;
+    else delete next[question];
+    updateField('perspective_answers', next);
   };
 
   const handleSave = async () => {
@@ -128,6 +134,7 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
         headline: profile.headline,
         commitment_level: profile.commitment_level,
         deal_breakers: profile.deal_breakers,
+        perspective_answers: profile.perspective_answers || {},
         country: profile.country,
         profile_photo_url: profile.profile_photo_url || '',
       });
@@ -307,14 +314,77 @@ function ProfileScreen({ onBack, onLogout, onReplayOnboarding }) {
               }} />
           </EditSection>
 
-          <EditSection title="Interests">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {INTERESTS.map(interest => (
-                <SelectionChip key={interest} label={interest}
-                  selected={profile.interests?.includes(interest)}
-                  onClick={() => toggleInterest(interest)} />
-              ))}
-            </div>
+          <EditSection title="Goal">
+            <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '0 0 12px' }}>
+              You will only meet people who chose the same sub-goal.
+            </p>
+            {GOAL_CATEGORIES.map(cat => (
+              <div key={cat.key} style={{ marginBottom: '14px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: theme.colors.textMedium, marginBottom: '6px' }}>
+                  {cat.label} — {cat.subtitle}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {cat.goals.map(goal => (
+                    <SelectionChip key={goal} label={goal}
+                      selected={profile.primary_goal === goal}
+                      onClick={() => updateField('primary_goal', goal)} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </EditSection>
+
+          <EditSection title={`Interests (top ${MAX_INTERESTS}, ranked)`}>
+            <p style={{ fontSize: '13px', color: theme.colors.textMedium, margin: '0 0 12px' }}>
+              Click in order of preference. {(profile.interests || []).length}/{MAX_INTERESTS} selected.
+            </p>
+            {INTEREST_CATEGORIES.map(cat => (
+              <div key={cat.label} style={{ marginBottom: '14px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: theme.colors.textMedium, marginBottom: '6px' }}>
+                  {cat.label}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {cat.interests.map(interest => {
+                    const rank = (profile.interests || []).indexOf(interest);
+                    return (
+                      <SelectionChip key={interest}
+                        label={rank > -1 ? `${rank + 1}. ${interest}` : interest}
+                        selected={rank > -1}
+                        onClick={() => toggleInterest(interest)} />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </EditSection>
+
+          <EditSection title="Perspective questions">
+            {PERSPECTIVE_CATEGORIES.map(cat => (
+              <div key={cat.name} style={{ marginBottom: '18px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: theme.colors.textMedium, marginBottom: '2px' }}>
+                  {cat.name} — {cat.tagline}
+                </div>
+                {cat.questions.map(question => (
+                  <div key={question} style={{ marginTop: '10px' }}>
+                    <label style={{ fontSize: '13px', color: theme.colors.textDark, display: 'block', marginBottom: '4px' }}>
+                      {question}
+                    </label>
+                    <textarea
+                      value={(profile.perspective_answers || {})[question] || ''}
+                      onChange={e => updatePerspectiveAnswer(question, e.target.value)}
+                      placeholder="Leave blank to skip"
+                      rows={2}
+                      style={{
+                        width: '100%', padding: '10px 12px', fontSize: '14px', lineHeight: '1.5',
+                        border: '1.5px solid #e0e0e0', borderRadius: '12px', outline: 'none',
+                        resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
+                        backgroundColor: 'transparent',
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
           </EditSection>
 
           <EditSection title="Personality">
