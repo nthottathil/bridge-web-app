@@ -88,7 +88,8 @@ function IntroducingScreen({ data, update }) {
 
   const mapCenter = selectedCity || CITIES[0]; // default London
   const distance = data.maxDistance || 5;
-  const span = Math.max(0.05, distance * 0.015);
+  // ~111 km per degree of latitude, so the map frames the chosen radius.
+  const span = Math.max(0.05, distance / 111);
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.lon - span},${mapCenter.lat - span},${mapCenter.lon + span},${mapCenter.lat + span}&layer=mapnik&marker=${mapCenter.lat},${mapCenter.lon}`;
 
   const handlePhotoSelect = (e) => {
@@ -345,7 +346,7 @@ function IntroducingScreen({ data, update }) {
               <input
                 type="range"
                 min={1}
-                max={50}
+                max={500}
                 value={distance}
                 onChange={e => update('maxDistance', parseInt(e.target.value))}
                 style={{ width: '100%', accentColor: theme.colors.primary }}

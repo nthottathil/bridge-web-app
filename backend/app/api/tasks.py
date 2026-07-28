@@ -11,14 +11,11 @@ from app.models.group import GroupMember
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 DEFAULT_TASKS = [
-    "Share your biggest goal this year",
-    "Tell the group one fun fact about yourself",
-    "Share a skill you'd love to learn",
-    "Recommend a book, podcast, or video",
-    "Share your morning routine",
-    "Describe your ideal work day",
-    "Share a challenge you recently overcame",
-    "Tell the group what motivates you most",
+    "What's something you're working on right now?",
+    "What does a normal week look like for you?",
+    "What's one thing you'd love to learn from this group?",
+    "What's the best thing you've watched, read or listened to lately?",
+    "What made you join Bridge?",
 ]
 
 

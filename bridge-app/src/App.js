@@ -9,7 +9,6 @@ import HeadlineScreen from './screens/HeadlineScreen';
 import GoalsPrimaryScreen from './screens/GoalsPrimaryScreen';
 import PerspectiveScreen from './screens/PerspectiveScreen';
 import InterestsScreen from './screens/InterestsScreen';
-import CommitmentScreen from './screens/CommitmentScreen';
 import DealBreakersScreen from './screens/DealBreakersScreen';
 import MatchingScreen from './screens/MatchingScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -23,15 +22,15 @@ import { FloatingNav, NavButton, BottomNav } from './components';
 import { authAPI, groupsAPI } from './services/api';
 
 /*
-  Onboarding flow (8 steps):
+  Onboarding flow (7 steps):
   0 Terms (Bridge Code)
   Tab 0 - Identity:    1 Introducing (incl location)
   Tab 1 - Direction:   2 Goals | 3 Headline | 4 Perspective
   Tab 2 - Vibe:        5 Interests
-  Tab 3 - Commitment:  6 Commitment | 7 DealBreakers
+  Tab 3 - Commitment:  6 DealBreakers
 */
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 7;
 
 const EMPTY_USER_DATA = {
   firstName: '',
@@ -174,7 +173,6 @@ function AppContent() {
         max_distance: userData.maxDistance || 5,
         focus: userData.focus || '',
         headline: userData.headline || '',
-        commitment_level: userData.commitmentLevel || '',
         deal_breakers: userData.dealBreakers || [],
         perspective_answers: userData.perspectiveAnswers || {},
         age_collab_only: userData.ageCollabOnly || false,
@@ -223,8 +221,7 @@ function AppContent() {
       case 3: return !!(userData.headline || userData.statement);
       case 4: return true;
       case 5: return userData.interests.length >= 3;
-      case 6: return !!userData.commitmentLevel;
-      case 7: return true;
+      case 6: return true; // deal breakers
       default: return true;
     }
   };
@@ -409,7 +406,6 @@ function AppContent() {
     <HeadlineScreen key="headline" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <PerspectiveScreen key="perspective" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} onHideNav={setHideFloatingNav} />,
     <InterestsScreen key="interests" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
-    <CommitmentScreen key="commitment" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
     <DealBreakersScreen key="dealbreakers" data={userData} update={updateUserData} onNext={handleNext} onBack={prevStep} />,
   ];
 
